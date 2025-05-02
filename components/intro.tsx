@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect } from "react";
 import Image from "next/image";
 import React from "react";
 import { motion } from "framer-motion";
@@ -9,10 +10,17 @@ import { FaGithubSquare } from "react-icons/fa";
 import { useSectionInView } from "@/lib/hooks";
 import { useActiveSectionContext } from "@/context/active-section-context";
 import ProfilePhoto from "@/public/Dave-on-computer.jpg";
+import party from "party-js";
 
 export default function Intro() {
   const { ref } = useSectionInView("Home", 0.5);
   const { setActiveSection, setTimeOfLastClick } = useActiveSectionContext();
+
+  useEffect(() => {
+    party.confetti(document.body, {
+      count: 200,
+    });
+  }, []);
 
   return (
     <section
