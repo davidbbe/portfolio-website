@@ -3,8 +3,6 @@ import { FaReact, FaWordpressSimple, FaShopify } from "react-icons/fa";
 import { SiNextdotjs } from "react-icons/si";
 import netflixroulettepic from "@/public/netflix-roulette-website.jpg";
 import uwhmappic from "@/public/UWH-map-website.jpg";
-import particlepic from "@/public/particle-website.jpg";
-import storepic from "@/public/store-website.jpg";
 
 export const links = [
   {
@@ -42,9 +40,9 @@ export const experiencesData = [
     date: "2013 - 2018",
   },
   {
-    title: "Front-end Engineer @ Particle Inc.",
-    location: "San Francisco, CA",
-    description: "I work together with the marketing team to make sure all of their technicall needs are met. I work on the particle.io website in the Gatsby.js framework. I also work on store.particle.io with Shopify theme development and custom Shopify app development. I also work on spectra.particle.io, blog.particle.io, and changelog.particle.io building custom WordPress themes.",
+    title: "Front-end Engineer @ [Company Name Redacted]",
+    location: "Remote",
+    description: "Client confidentiality agreements prevent me from sharing the details of my work with this company.",
     icon: React.createElement(FaReact),
     date: "2018 - present",
   },
@@ -71,21 +69,7 @@ export const projectsData = [
     description: "I designed and developed this application. It uses the IMDB, TMDB, OMDB, and JustWatch APIs to search for movies and TV shows. It features an interactive UI with multiple animations to retain user attention and engagement. This website has over 1.3k active monthy users and ranks very high on Google for the search term 'Netflix Roulette'.",
     tags: ["Gatsby.js", "GSAP", "Styled Components", "React Query", "Contentful CMS", "Netlify", "IMDB API", "TMDB API", "OMDB API", "JustWatch API"],
     imageUrl: netflixroulettepic,
-  },
-  {
-    title: "Particle",
-    url: "https://particle.io",
-    description: "Im the sole developer for this Particle website. I work with the marketing team to make sure they are able to interact with their customers through this website. We use both Contentful CMS and a headless WordPress to allow the marketing team to manage the content on the site.",
-    tags: ["Gatsby.js", "GraphQL", "Styled Components", "Redux", "Contentful CMS", "Headless WordPress", "Netlify", "Intersection Observer", "Segment", "Marketo API", "GreenHouse Job Board API" ],
-    imageUrl: particlepic,
-  },
-  {
-    title: "Particle store",
-    url: "https://store.particle.io",
-    description: "Im the sole developer for this Shopify store. I worked with the design team to create a custom Shopify theme thats allows them to showcase their brand, message, and product line. I also built a custom Shopify app for this store to add extra functionality where Shopify has limitations.",
-    tags: ["Shopify", "Liquid", "Javascript", "Sass", "Shopify App Development", "Shopify Storefront API", "Shopify Admin API", "Shopify Webhooks", "Shopify Embedded App SDK", "Shopify CLI"],
-    imageUrl: storepic,
-  },
+  }
 ] as const;
 
 export const skillsData = [
