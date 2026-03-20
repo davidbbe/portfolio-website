@@ -36,23 +36,24 @@ export default function SceneRig() {
     const mouse = mouseRef.current;
 
     targetPosition.current.set(
-      hint[0] + mouse.x * mouseProfile.xStrength,
-      hint[1] - mouse.y * mouseProfile.yStrength,
+      hint[0] + mouse.x * mouseProfile.xStrength * 0.7,
+      hint[1] - mouse.y * mouseProfile.yStrength * 0.7,
       hint[2]
     );
 
     camera.position.lerp(targetPosition.current, mouseProfile.smoothing);
-    camera.rotation.x +=
-      (-mouse.y * mouseProfile.rotationStrength - camera.rotation.x) *
-      mouseProfile.smoothing;
-    camera.rotation.y +=
-      (mouse.x * mouseProfile.rotationStrength - camera.rotation.y) *
-      mouseProfile.smoothing;
 
     if (Math.abs(camera.fov - fovTarget) > 0.05) {
       camera.fov += (fovTarget - camera.fov) * 0.06;
       camera.updateProjectionMatrix();
     }
+
+    const target = anchor.objectTransform.position;
+    camera.lookAt(
+      target[0] + mouse.x * mouseProfile.rotationStrength * 0.15,
+      target[1] - mouse.y * mouseProfile.rotationStrength * 0.15,
+      target[2]
+    );
   });
 
   return null;

@@ -62,7 +62,7 @@ export const sectionAnchors: Record<SectionSlug, SceneAnchor> = {
     objectTransform: {
       position: [-0.6, 0.1, -0.6],
       rotation: [0.4, -1.1, 0.22],
-      scale: [0.95, 0.95, 0.95],
+      scale: [1.15, 1.15, 1.15],
     },
     materialPreset: "neon",
     cameraHint: {
@@ -81,7 +81,7 @@ export const sectionAnchors: Record<SectionSlug, SceneAnchor> = {
     objectTransform: {
       position: [1.3, 0.25, -0.8],
       rotation: [0.2, 0.35, 0.4],
-      scale: [1.1, 1.1, 1.1],
+      scale: [1.25, 1.25, 1.25],
     },
     materialPreset: "matte",
     cameraHint: {
@@ -100,7 +100,7 @@ export const sectionAnchors: Record<SectionSlug, SceneAnchor> = {
     objectTransform: {
       position: [0, -0.25, -0.4],
       rotation: [-0.1, -0.6, 0],
-      scale: [0.9, 0.9, 0.9],
+      scale: [1.2, 1.2, 1.2],
     },
     materialPreset: "glass",
     cameraHint: {

@@ -1,5 +1,7 @@
 "use client";
 
+import React from "react";
+
 type RevealTextProps = {
   as?: "h1" | "h2" | "p";
   className?: string;
@@ -17,10 +19,12 @@ export default function RevealText({
   return (
     <Tag className={className}>
       {words.map((word, index) => (
-        <span key={`${word}-${index}`} data-reveal className="reveal-word">
-          {word}
+        <React.Fragment key={`${word}-${index}`}>
+          <span data-reveal className="reveal-word">
+            {word}
+          </span>
           {index < words.length - 1 ? " " : ""}
-        </span>
+        </React.Fragment>
       ))}
     </Tag>
   );

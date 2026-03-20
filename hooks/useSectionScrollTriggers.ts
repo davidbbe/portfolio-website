@@ -19,6 +19,7 @@ export function useSectionScrollTriggers({
   const { setActiveSection } = useSceneState();
 
   useEffect(() => {
+    setActiveSection("hero");
     const scope = scopeRef.current;
     if (!scope) {
       return;

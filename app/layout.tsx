@@ -19,7 +19,7 @@ export default function RootLayout({
       lang="en"
       className={`${sora.variable} ${manrope.variable} antialiased`}
     >
-      <body className="creative-body">
+      <body className="creative-body" style={{ backgroundColor: "#06080f" }}>
         <AppProviders>
           <GlobalSceneCanvas />
           {children}

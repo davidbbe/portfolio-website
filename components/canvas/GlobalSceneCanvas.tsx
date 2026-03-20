@@ -1,22 +1,15 @@
 "use client";
 
-import { useSceneState } from "@/context/scene-state-context";
 import { Canvas } from "@react-three/fiber";
-import { Environment } from "@react-three/drei";
 import SceneObjectManager from "./SceneObjectManager";
 import SceneRig from "./SceneRig";
 import PostFX from "./effects/PostFX";
 
-const foregroundSections = new Set(["hero", "projects"]);
-
 export default function GlobalSceneCanvas() {
-  const { activeSection } = useSceneState();
-  const isForeground = foregroundSections.has(activeSection);
-
   return (
     <div
       aria-hidden="true"
-      className={`canvas-shell ${isForeground ? "canvas-shell--front" : "canvas-shell--back"}`}
+      className="canvas-shell canvas-shell--front"
     >
       <Canvas
         shadows
@@ -30,9 +23,12 @@ export default function GlobalSceneCanvas() {
         <ambientLight intensity={0.45} />
         <directionalLight position={[3, 3, 4]} intensity={1.4} castShadow />
         <pointLight position={[-2, 1, 3]} intensity={0.7} color="#7ba6ff" />
+        <hemisphereLight
+          args={["#a5c8ff", "#21304e", 0.7]}
+          position={[0, 2.5, 0]}
+        />
         <SceneRig />
         <SceneObjectManager />
-        <Environment preset="city" />
         <PostFX />
       </Canvas>
     </div>
