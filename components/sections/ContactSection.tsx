@@ -12,7 +12,7 @@ export default function ContactSection() {
       className="creative-section creative-section--contact"
     >
       <p data-reveal className="eyebrow">
-        Ready to apply?
+        Contact
       </p>
       <RevealText as="h2" className="section-title">
         {footerContact.title}
@@ -25,7 +25,7 @@ export default function ContactSection() {
         className="creative-btn creative-btn--solid"
         href="/placeholder"
       >
-        Submit your application
+        Submit
       </a>
     </section>
   );

@@ -57,27 +57,27 @@ export function useSectionScrollTriggers({
         const revealConfig =
           variant === "staggered"
             ? {
-                yPercent: 28,
-                skewY: 5,
-                duration: 1,
-                ease: "power3.out",
-                stagger: 0.08,
-              }
+              yPercent: 28,
+              skewY: 5,
+              duration: 1,
+              ease: "power3.out",
+              stagger: 0.08,
+            }
             : variant === "softReveal"
               ? {
-                  yPercent: 16,
-                  skewY: 2,
-                  duration: 0.8,
-                  ease: "power2.out",
-                  stagger: 0.055,
-                }
+                yPercent: 16,
+                skewY: 2,
+                duration: 0.8,
+                ease: "power2.out",
+                stagger: 0.055,
+              }
               : {
-                  yPercent: 22,
-                  skewY: 0,
-                  duration: 0.8,
-                  ease: "power3.out",
-                  stagger: 0,
-                };
+                yPercent: 22,
+                skewY: 0,
+                duration: 0.8,
+                ease: "power3.out",
+                stagger: 0,
+              };
 
         const revealTl = gsap.timeline({
           scrollTrigger: {

@@ -157,7 +157,7 @@ export default function HeroSection() {
             </span>
           </h1>
 
-          <div className="creative-hero__header-row md:pr-20">
+          <div className="creative-hero__header-row md:pr-20 xl:pr-0">
             <div className="creative-hero__sub-text">
               {heroSection.subLines.map((line) => (
                 <div key={line} className="creative-hero__sub-clip">

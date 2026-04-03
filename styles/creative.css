@@ -71,10 +71,12 @@
 .creative-hero {
   position: relative;
   min-height: 100svh;
+  max-width: 76rem;
+  margin: 0 auto;
   display: flex;
   flex-direction: column;
   justify-content: flex-end;
-  padding: 0 2.5rem 3rem;
+  padding: clamp(7rem, 15vh, 12rem) 1.35rem 6rem;
   overflow: hidden;
 }
 
@@ -86,7 +88,7 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 1.5rem 2.5rem;
+  padding: 1.5rem 1.35rem;
   z-index: 10;
 }
 
@@ -141,14 +143,13 @@
 }
 
 .creative-hero__content {
-  max-width: 85rem;
   width: 100%;
   margin: 0 auto;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
   flex: 1;
-  padding-top: 8rem;
+  min-height: 0;
 }
 
 .creative-hero__headings {
@@ -374,11 +375,15 @@
 
 @media (max-width: 768px) {
   .creative-hero {
-    padding: 0 1.25rem 2rem;
+    min-height: 85svh;
+    padding-top: 12vh;
+    padding-left: 1.35rem;
+    padding-right: 1.35rem;
+    padding-bottom: 6rem;
   }
 
   .creative-hero__nav {
-    padding: 1.25rem 1.25rem;
+    padding: 1.25rem 0;
   }
 
   .creative-hero__heading {

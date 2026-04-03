@@ -1,6 +1,6 @@
 export const heroSection = {
   subLines: [
-    "I specialize in building high-performance web applications using React, Next.js, TypeScript, and motion animation libraries like GSAP.",
+    "I specialize in building high-performance web applications using React, Next.js, TypeScript, and motion animation libraries like GSAP, Framer Motion, and Three.js.",
   ],
   ctas: [
     { label: "View my work", href: "/portfolio" },
@@ -55,7 +55,7 @@ export const faqItems = [
 ] as const;
 
 export const footerContact = {
-  title: "Ready to learn more?",
-  body: "Apply to receive roadmap and support built for your creator business. Every application is reviewed for fit and growth opportunity.",
+  title: "Send me a message",
+  body: "I am always looking for new opportunities. Please contact me if you have any questions or would like to discuss a potential project. I will get back to you as soon as possible.",
 };
 

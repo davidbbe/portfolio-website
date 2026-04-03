@@ -11,8 +11,8 @@ export const SECTION_ORDER: SectionSlug[] = [
 export const DEFAULT_SECTION: SectionSlug = "hero";
 
 export const SCROLL_TRIGGER_DEFAULTS = {
-  start: "top 65%",
-  end: "bottom 35%",
+  start: "top 75%",
+  end: "bottom 15%",
 };
 
 export const SCENE_DAMPING = {

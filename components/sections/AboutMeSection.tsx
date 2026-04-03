@@ -15,23 +15,25 @@ export default function AboutMeSection() {
         About Me
       </p>
       <RevealText as="h2" className="section-title">
-        Full-stack developer with over 10 years of experience.
+        Strategy-led UI engineering with a design-first mindset.
       </RevealText>
-      <RevealText as="p" className="section-copy">
-        I help brands & businesses develop, test, deploy, and monitor web-based
-        applications. My specialties include building interactive user
-        interfaces and working hand in hand with designers to bring mockups and
-        concept designs to life. Over the years I have done this in frameworks
-        like Next.js, Gatsby.js, WordPress, and Shopify.
-      </RevealText>
-      <RevealText as="p" className="section-copy">
-        My favorite part of programming is the problem-solving aspect. I really
-        enjoy the feeling of finally figuring out a solution to a problem. My
-        core stack is React, Next.js, TypeScript, Node.js, Prisma, and
-        PostgreSQL. I am also familiar with Gatsby.js, WordPress theme
-        development, Shopify theme & app development. I am always looking to
-        learn new technologies.
-      </RevealText>
+      <p data-reveal className="section-copy">
+        I have partnered with startups and established brands to build polished
+        web products that balance performance, scalability, and expressive
+        motion. The majority of my work has been working with startups and
+        early-stage companies. This has given me a deep understanding of the
+        challenges and opportunities that come with building products for
+        early-stage companies. These challenges typically include a need for
+        quick iteration, a focus on user experience, and sometimes a need to to
+        wear many hats that a developer typically doesn't have to wear.
+      </p>
+      <p data-reveal className="section-copy">
+        I enjoy the problem-solving aspect of building products. My core stack
+        is React, Next.js, TypeScript, Node.js, Prisma, and PostgreSQL. I am
+        also familiar with Gatsby.js, WordPress theme development, Shopify theme
+        & app development. I am always looking to learn new technologies and
+        stay up to date with the latest trends in the industry.
+      </p>
       <div className="service-grid">
         {aboutMe.map((feature) => (
           <article key={feature.title} className="service-card" data-reveal>
