@@ -144,7 +144,7 @@ export default function HeroSection() {
           aria-label="clients"
         >
           <Image
-            src="/images/site-icon.svg"
+            src="/android-chrome-192x192.png"
             alt=""
             width={28}
             height={28}
@@ -163,7 +163,7 @@ export default function HeroSection() {
             </span>
           </h1>
 
-          <div className="creative-hero__header-row">
+          <div className="creative-hero__header-row md:pr-20">
             <div className="creative-hero__sub-text">
               {heroSection.subLines.map((line) => (
                 <div key={line} className="creative-hero__sub-clip">
@@ -177,7 +177,9 @@ export default function HeroSection() {
             <h1 className="creative-hero__heading creative-hero__heading--right">
               <span className="creative-hero__heading-clip">
                 <span data-hero-line className="creative-hero__heading-line">
-                  Full-stack Developer
+                  Full-stack<span className="inline md:hidden">&nbsp;</span>
+                  <br className="hidden md:block" />
+                  Developer
                 </span>
               </span>
             </h1>

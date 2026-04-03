@@ -1,0 +1,21 @@
+---
+description: When starting npm run dev, use a visible integrated terminal and tell the user how to find and stop it
+alwaysApply: true
+---
+
+# Local dev server (`npm run dev`)
+
+When you start a long-running dev server for this project (e.g. `npm run dev`, `next dev`):
+
+1. **Use the integrated terminal** — Run it with the normal Shell tool so Cursor creates or uses a terminal tab with live output. Do **not** start it only inside a background subagent (`run_in_background`) or other path that hides where the process lives.
+
+2. **Make the URL obvious** — In the same terminal session, the Next.js banner will show the URL (e.g. `http://localhost:3000`). If port fallback happens (3001, etc.), that line is the source of truth.
+
+3. **Tell the user in your reply** — After starting the server, briefly state:
+   - The **exact URL** (including port).
+   - That the process is running in the **Terminal** panel and they should select the tab that shows `npm run dev` / `next dev` if it is not focused.
+   - How to stop it: **Ctrl+C** in that terminal tab.
+
+4. **Avoid duplicate servers** — Before starting another dev server, mention if one may already be running on the default port, or suggest checking existing terminal tabs / `lsof -iTCP:3000 -sTCP:LISTEN` so the user does not end up on the wrong port.
+
+Note: The agent cannot force Cursor to focus the Terminal view; the user may need to open **View → Terminal** (macOS: **Ctrl+`** ) and click the correct tab.

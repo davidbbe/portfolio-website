@@ -40,7 +40,7 @@
 }
 
 .canvas-shell--front {
-  z-index: 40;
+  z-index: 1;
 }
 
 .canvas-shell--back {
@@ -149,7 +149,6 @@
 }
 
 .creative-hero__heading--right {
-  text-align: right;
   flex-shrink: 0;
 }
 
