@@ -1,30 +1,31 @@
 "use client";
 
 import RevealText from "./shared/RevealText";
+import { heroSection } from "@/lib/content/influint-sections";
 
 export default function HeroSection() {
   return (
     <section
       id="hero"
       data-scene-section="hero"
+      data-reveal-variant="hero"
       className="creative-section creative-section--hero"
     >
-      <p data-reveal className="eyebrow">
-        Creative Developer / Frontend Engineer
+      <p data-reveal className="eyebrow eyebrow--caps">
+        {heroSection.eyebrow}
       </p>
       <RevealText as="h1" className="hero-title">
-        Building premium web experiences with motion, depth, and clarity.
+        {heroSection.title}
       </RevealText>
       <RevealText as="p" className="section-copy">
-        I design and ship conversion-focused interfaces that blend robust
-        engineering with high-end visual direction.
+        {heroSection.supportingCopy}
       </RevealText>
       <div data-reveal className="hero-cta-row">
-        <a href="#projects" className="creative-btn">
-          View selected work
+        <a href="#contact" className="creative-btn creative-btn--solid">
+          {heroSection.ctas[0].label}
         </a>
-        <a href="#contact" className="creative-btn creative-btn--ghost">
-          Start a project
+        <a href={heroSection.ctas[1].href} className="creative-btn creative-btn--ghost">
+          {heroSection.ctas[1].label}
         </a>
       </div>
     </section>

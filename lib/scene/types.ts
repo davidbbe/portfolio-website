@@ -1,9 +1,11 @@
 export type SectionSlug =
   | "hero"
-  | "about"
-  | "projects"
-  | "skills"
-  | "experience"
+  | "mission"
+  | "process"
+  | "outcomes"
+  | "testimonials"
+  | "team"
+  | "faq"
   | "contact";
 
 export type MaterialPreset = "glass" | "chrome" | "matte" | "neon";
@@ -28,4 +30,9 @@ export type SceneAnchor = {
   };
   mouseProfile: MouseProfile;
   timelinePreset: "hero" | "softReveal" | "staggered";
+  microMotion?: {
+    orbitBoost: number;
+    wirePulse: number;
+    driftStrength: number;
+  };
 };

@@ -25,6 +25,21 @@ export function useSectionScrollTriggers({
       return;
     }
 
+    const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const isMobileViewport = window.matchMedia("(max-width: 768px)").matches;
+    gsap.set(scope.querySelectorAll("[data-reveal]"), { autoAlpha: 1, y: 0, skewY: 0 });
+
+    if (prefersReducedMotion) {
+      scope.querySelectorAll<HTMLElement>("[data-scene-section]").forEach((section) => {
+        const slug = section.dataset.sceneSection;
+        if (slug) {
+          setActiveSection(slug as SectionSlug);
+        }
+      });
+
+      return;
+    }
+
     const sections = Array.from(
       scope.querySelectorAll<HTMLElement>("[data-scene-section]")
     );
@@ -38,12 +53,38 @@ export function useSectionScrollTriggers({
         }
 
         const revealItems = section.querySelectorAll<HTMLElement>("[data-reveal]");
+        const variant = section.dataset.revealVariant ?? "hero";
+        const revealConfig =
+          variant === "staggered"
+            ? {
+                yPercent: 28,
+                skewY: 5,
+                duration: 1,
+                ease: "power3.out",
+                stagger: 0.08,
+              }
+            : variant === "softReveal"
+              ? {
+                  yPercent: 16,
+                  skewY: 2,
+                  duration: 0.8,
+                  ease: "power2.out",
+                  stagger: 0.055,
+                }
+              : {
+                  yPercent: 22,
+                  skewY: 0,
+                  duration: 0.8,
+                  ease: "power3.out",
+                  stagger: 0,
+                };
 
         const revealTl = gsap.timeline({
           scrollTrigger: {
             trigger: section,
             start: SCROLL_TRIGGER_DEFAULTS.start,
             end: SCROLL_TRIGGER_DEFAULTS.end,
+            scrub: variant === "hero" || isMobileViewport ? false : 0.35,
             onEnter: () => setActiveSection(sectionSlug),
             onEnterBack: () => setActiveSection(sectionSlug),
           },
@@ -54,16 +95,16 @@ export function useSectionScrollTriggers({
             revealItems,
             {
               autoAlpha: 0,
-              yPercent: 20,
-              skewY: 5,
+              yPercent: revealConfig.yPercent,
+              skewY: revealConfig.skewY,
             },
             {
               autoAlpha: 1,
               yPercent: 0,
               skewY: 0,
-              duration: 0.8,
-              stagger: 0.08,
-              ease: "power3.out",
+              duration: revealConfig.duration,
+              stagger: revealConfig.stagger,
+              ease: revealConfig.ease,
             }
           );
         }

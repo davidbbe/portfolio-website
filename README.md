@@ -1,26 +1,15 @@
-# Portfolio website with Next.js, TypeScript, Tailwind CSS, and Framer Motion
+# Creative portfolio (Next.js)
 
-This is a one page website for the my personal portfolio site at https://daveb.co. It is built with Next.js, TypeScript, Tailwind CSS, and Framer Motion. It includes a dark mode, email sending functionality, and a resend email feature.
+Personal portfolio built with the App Router, TypeScript, Tailwind CSS, Lenis smooth scrolling, GSAP scroll triggers, and a React Three Fiber scene.
 
-## Installation
+## Setup
 
 1. `npm install`
-2. Add RESEND_API_KEY environment variable in .env.local
-3. In the sendEmail.ts action file, change the "to" email to your own email
-4. `npm run dev`
+2. `npm run dev`
 
-## Built With
+## Stack
 
-- Latest Next.js features
-- Next.js App Router
-- Next.js Server Actions
-- Client & Server Components
-- TypeScript
+- Next.js (App Router)
 - Tailwind CSS
-- Context API
-- Advanced Animations with Framer Motion
-- React.Email & Resend
-- Custom React hooks
-- Fresh, modern UI design
-- Light & Dark mode
-- Responsive website
+- Three.js / React Three Fiber / Drei / postprocessing
+- Lenis + GSAP for scroll-driven motion

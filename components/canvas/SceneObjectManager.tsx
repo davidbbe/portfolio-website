@@ -62,6 +62,8 @@ export default function SceneObjectManager() {
   const enteredRef = useRef(false);
   const spinSpeedRef = useRef(0.2);
   const initializedRef = useRef(false);
+  const anchorRef = useRef(sectionAnchors[activeSection]);
+  const frameClockRef = useRef(0);
 
   const clamp = (value: number, min: number, max: number) =>
     Math.min(max, Math.max(min, value));
@@ -75,6 +77,7 @@ export default function SceneObjectManager() {
     }
 
     const anchor = sectionAnchors[activeSection];
+    anchorRef.current = anchor;
     const preset = materialPresets[anchor.materialPreset];
     const safePosition = {
       x: clamp(anchor.objectTransform.position[0], -1.05, 1.05),
@@ -193,17 +196,37 @@ export default function SceneObjectManager() {
   }, [activeSection]);
 
   useFrame((state, delta) => {
+    frameClockRef.current += delta;
     const group = groupRef.current;
     const wire = wireRef.current;
     if (!group || !initializedRef.current) {
       return;
     }
 
-    group.rotation.y += delta * spinSpeedRef.current;
+    const anchor = anchorRef.current;
+    const microMotion = anchor.microMotion ?? {
+      orbitBoost: 0.2,
+      wirePulse: 0.016,
+      driftStrength: 0.012,
+    };
+
+    const driftX = Math.sin(frameClockRef.current * 0.35) * microMotion.driftStrength;
+    const driftY = Math.cos(frameClockRef.current * 0.45) * microMotion.driftStrength;
+
+    const targetX = anchor.objectTransform.position[0] + driftX;
+    const targetY = anchor.objectTransform.position[1] + driftY;
+    const targetZ = anchor.objectTransform.position[2];
+
+    group.rotation.x += Math.sin(frameClockRef.current * 0.08) * 0.0025;
+    group.rotation.z += Math.cos(frameClockRef.current * 0.09) * 0.002;
+    group.rotation.y += delta * spinSpeedRef.current * microMotion.orbitBoost;
     group.rotation.x += delta * 0.06;
+    group.position.x += (targetX - group.position.x) * 0.06;
+    group.position.y += (targetY - group.position.y) * 0.06;
+    group.position.z += (targetZ - group.position.z) * 0.06;
 
     if (wire) {
-      const pulse = 1 + Math.sin(state.clock.elapsedTime * 1.8) * 0.03;
+      const pulse = 1 + Math.sin(state.clock.elapsedTime * 1.8) * microMotion.wirePulse;
       wire.scale.setScalar(wire.scale.x * 0.97 + pulse * 0.03);
     }
   });

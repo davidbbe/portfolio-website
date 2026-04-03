@@ -9,11 +9,17 @@ gsap.registerPlugin(ScrollTrigger);
 
 export function useSmoothScroll() {
   useEffect(() => {
+    const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    if (reduceMotion) {
+      return;
+    }
+
+    const isTouch = window.matchMedia("(max-width: 768px)").matches;
     const lenis = new Lenis({
       duration: 1.1,
       smoothWheel: true,
       wheelMultiplier: 0.9,
-      touchMultiplier: 1.5,
+      touchMultiplier: isTouch ? 1.15 : 1.5,
     });
 
     const onRaf = (time: number) => {

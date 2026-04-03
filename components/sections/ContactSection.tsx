@@ -1,26 +1,29 @@
 "use client";
 
 import RevealText from "./shared/RevealText";
+import { footerContact } from "@/lib/content/influint-sections";
 
 export default function ContactSection() {
   return (
     <section
       id="contact"
       data-scene-section="contact"
+      data-reveal-variant="softReveal"
       className="creative-section creative-section--contact"
     >
       <p data-reveal className="eyebrow">
-        Contact
+        Ready to apply?
       </p>
-      <RevealText as="h2" className="section-title">
-        Let us turn your product story into a premium web experience.
-      </RevealText>
+      <RevealText as="h2" className="section-title">{footerContact.title}</RevealText>
       <RevealText as="p" className="section-copy">
-        Send over your goals, timeline, and references. I can scope the right
-        interaction model and technical architecture for launch.
+        {footerContact.body}
       </RevealText>
-      <a data-reveal className="creative-btn" href="mailto:hello@example.com">
-        hello@example.com
+      <a
+        data-reveal
+        className="creative-btn creative-btn--solid"
+        href="https://influint.link/InfluintApplication"
+      >
+        Submit your application
       </a>
     </section>
   );

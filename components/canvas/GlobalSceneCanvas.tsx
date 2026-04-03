@@ -1,11 +1,36 @@
 "use client";
 
 import { Canvas } from "@react-three/fiber";
+import { useEffect, useState } from "react";
 import SceneObjectManager from "./SceneObjectManager";
 import SceneRig from "./SceneRig";
 import PostFX from "./effects/PostFX";
 
 export default function GlobalSceneCanvas() {
+  const [isEnabled, setIsEnabled] = useState(false);
+
+  useEffect(() => {
+    const motionMatch = window.matchMedia("(prefers-reduced-motion: reduce)");
+    const isMobile = window.matchMedia("(max-width: 768px)");
+
+    const update = () => {
+      setIsEnabled(!motionMatch.matches && !isMobile.matches);
+    };
+
+    update();
+    motionMatch.addEventListener("change", update);
+    isMobile.addEventListener("change", update);
+
+    return () => {
+      motionMatch.removeEventListener("change", update);
+      isMobile.removeEventListener("change", update);
+    };
+  }, []);
+
+  if (!isEnabled) {
+    return null;
+  }
+
   return (
     <div
       aria-hidden="true"

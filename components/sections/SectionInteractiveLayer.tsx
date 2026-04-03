@@ -7,11 +7,13 @@ import type { SectionSlug } from "@/lib/scene/types";
 
 const sectionTone: Record<SectionSlug, { scale: number; hue: number; blend: string }> = {
   hero: { scale: 1.2, hue: 210, blend: "screen" },
-  about: { scale: 0.9, hue: 190, blend: "lighten" },
-  projects: { scale: 1.4, hue: 240, blend: "screen" },
-  skills: { scale: 1.1, hue: 160, blend: "plus-lighter" },
-  experience: { scale: 0.8, hue: 30, blend: "lighten" },
-  contact: { scale: 1, hue: 350, blend: "screen" },
+  mission: { scale: 1.08, hue: 190, blend: "lighten" },
+  process: { scale: 1.25, hue: 255, blend: "screen" },
+  outcomes: { scale: 1.03, hue: 152, blend: "plus-lighter" },
+  testimonials: { scale: 0.95, hue: 25, blend: "lighten" },
+  team: { scale: 1.06, hue: 300, blend: "screen" },
+  faq: { scale: 0.98, hue: 220, blend: "lighten" },
+  contact: { scale: 1.11, hue: 350, blend: "screen" },
 };
 
 export default function SectionInteractiveLayer() {
@@ -23,6 +25,17 @@ export default function SectionInteractiveLayer() {
   const tone = useMemo(() => sectionTone[activeSection], [activeSection]);
 
   useEffect(() => {
+    const finePointer =
+      window.matchMedia("(hover: hover)").matches &&
+      window.matchMedia("(pointer: fine)").matches;
+    const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    if (!finePointer || prefersReducedMotion) {
+      if (dotRef.current) {
+        dotRef.current.style.opacity = "0";
+      }
+      return;
+    }
+
     const onMove = (event: MouseEvent) => {
       mouseRef.current = {
         x: event.clientX,
