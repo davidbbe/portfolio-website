@@ -1,7 +1,7 @@
 "use client";
 
 import RevealText from "./shared/RevealText";
-import { faqItems, footerContact } from "@/lib/content/influint-sections";
+import { faqItems, footerContact } from "@/lib/content/sections";
 
 export default function FaqSection() {
   return (
@@ -11,7 +11,9 @@ export default function FaqSection() {
       data-reveal-variant="hero"
       className="creative-section"
     >
-      <p data-reveal className="eyebrow eyebrow--overline">Questions</p>
+      <p data-reveal className="eyebrow eyebrow--overline">
+        Questions
+      </p>
       <RevealText as="h2" className="section-title">
         Frequently Asked Questions
       </RevealText>
@@ -25,7 +27,11 @@ export default function FaqSection() {
       </div>
       <div className="contact-cta">
         <p data-reveal>{footerContact.body}</p>
-        <a data-reveal href="#contact" className="creative-btn creative-btn--solid">
+        <a
+          data-reveal
+          href="#contact"
+          className="creative-btn creative-btn--solid"
+        >
           {footerContact.title}
         </a>
       </div>

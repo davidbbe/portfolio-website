@@ -1,7 +1,7 @@
 "use client";
 
 import RevealText from "./shared/RevealText";
-import { processSteps } from "@/lib/content/influint-sections";
+import { processSteps } from "@/lib/content/sections";
 
 export default function ProcessSection() {
   return (
@@ -11,7 +11,9 @@ export default function ProcessSection() {
       data-reveal-variant="softReveal"
       className="creative-section"
     >
-      <p data-reveal className="eyebrow eyebrow--overline">ourPROCESS</p>
+      <p data-reveal className="eyebrow eyebrow--overline">
+        ourPROCESS
+      </p>
       <RevealText as="h2" className="section-title">
         A clearer path from strategy to scale.
       </RevealText>

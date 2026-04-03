@@ -1,7 +1,7 @@
 "use client";
 
 import RevealText from "./shared/RevealText";
-import { footerContact } from "@/lib/content/influint-sections";
+import { footerContact } from "@/lib/content/sections";
 
 export default function ContactSection() {
   return (
@@ -14,14 +14,16 @@ export default function ContactSection() {
       <p data-reveal className="eyebrow">
         Ready to apply?
       </p>
-      <RevealText as="h2" className="section-title">{footerContact.title}</RevealText>
+      <RevealText as="h2" className="section-title">
+        {footerContact.title}
+      </RevealText>
       <RevealText as="p" className="section-copy">
         {footerContact.body}
       </RevealText>
       <a
         data-reveal
         className="creative-btn creative-btn--solid"
-        href="https://influint.link/InfluintApplication"
+        href="/placeholder"
       >
         Submit your application
       </a>

@@ -1,7 +1,7 @@
 "use client";
 
 import RevealText from "./shared/RevealText";
-import { missionFeatures } from "@/lib/content/influint-sections";
+import { missionFeatures } from "@/lib/content/sections";
 
 export default function MissionSection() {
   return (
@@ -11,12 +11,15 @@ export default function MissionSection() {
       data-reveal-variant="staggered"
       className="creative-section"
     >
-      <p data-reveal className="eyebrow eyebrow--overline">Our Mission.</p>
+      <p data-reveal className="eyebrow eyebrow--overline">
+        Our Mission.
+      </p>
       <RevealText as="h2" className="section-title">
         Transform your passion into profit.
       </RevealText>
       <RevealText as="p" className="section-copy">
-        Like so many creator partners, we turn potential into momentum with clear systems and practical execution.
+        Like so many creator partners, we turn potential into momentum with
+        clear systems and practical execution.
       </RevealText>
       <div className="service-grid">
         {missionFeatures.map((feature) => (

@@ -1,12 +1,10 @@
 export const heroSection = {
-  eyebrow: "Your Vision. Our Mission.",
-  title:
-    "Full-service management and business growth solutions for creators. Your future starts here.",
-  supportingCopy:
-    "Strategic partnerships, business systems, and growth support for creator-led brands ready to scale without losing creative ownership.",
+  subLines: [
+    "I specialize in building high-performance web applications using React, Next.js, TypeScript, and motion animation libraries like GSAP.",
+  ],
   ctas: [
-    { label: "Apply Now", href: "https://influint.link/InfluintApplication" },
-    { label: "Read the Process", href: "#process" },
+    { label: "View my work", href: "/portfolio" },
+    { label: "Contact me", href: "/contact" },
   ],
 };
 
@@ -59,7 +57,7 @@ export const processSteps = [
 export const outcomeMetrics = [
   {
     value: "150+",
-    label: "Creators trust influint",
+    label: "Creators trust us",
   },
   {
     value: "3x",
@@ -103,7 +101,7 @@ export const teamMembers = [
 
 export const faqItems = [
   {
-    question: "How does influint work?",
+    question: "How does your program work?",
     answer:
       "We integrate with your business like an extension of your team, helping with partnership management, contract strategy, growth planning, and brand development.",
   },
@@ -113,7 +111,7 @@ export const faqItems = [
       "Creators who are ready to professionalize their operations and scale sustainably across sponsorship, audience growth, and new revenue channels.",
   },
   {
-    question: "What makes influint different?",
+    question: "What makes you different?",
     answer:
       "A business-first stance: we build durable creative businesses, not just one-off partnerships, with operational support that compounds over time.",
   },

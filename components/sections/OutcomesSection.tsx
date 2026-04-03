@@ -1,7 +1,7 @@
 "use client";
 
 import RevealText from "./shared/RevealText";
-import { outcomeMetrics, outcomeWords } from "@/lib/content/influint-sections";
+import { outcomeMetrics, outcomeWords } from "@/lib/content/sections";
 
 export default function OutcomesSection() {
   return (
@@ -11,7 +11,9 @@ export default function OutcomesSection() {
       data-reveal-variant="staggered"
       className="creative-section"
     >
-      <p data-reveal className="eyebrow eyebrow--overline">What you unlock with support</p>
+      <p data-reveal className="eyebrow eyebrow--overline">
+        What you unlock with support
+      </p>
       <RevealText as="h2" className="section-title">
         The roadmap + support you need to grow.
       </RevealText>

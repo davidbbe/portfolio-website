@@ -1,6 +1,6 @@
 "use client";
 
-import { teamMembers } from "@/lib/content/influint-sections";
+import { teamMembers } from "@/lib/content/sections";
 
 export default function TeamSection() {
   return (
@@ -10,7 +10,9 @@ export default function TeamSection() {
       data-reveal-variant="staggered"
       className="creative-section"
     >
-      <p data-reveal className="eyebrow eyebrow--overline">people</p>
+      <p data-reveal className="eyebrow eyebrow--overline">
+        people
+      </p>
       <h2 data-reveal className="section-title">
         The team supporting your growth.
       </h2>
