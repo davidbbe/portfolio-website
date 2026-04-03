@@ -25,7 +25,7 @@ export const sectionAnchors: Record<SectionSlug, SceneAnchor> = {
       driftStrength: 0.02,
     },
   },
-  mission: {
+  about: {
     objectTransform: {
       position: [-0.9, 0.1, -0.45],
       rotation: [0.5, 0.15, 0.2],
@@ -49,7 +49,7 @@ export const sectionAnchors: Record<SectionSlug, SceneAnchor> = {
       driftStrength: 0.012,
     },
   },
-  process: {
+  projects: {
     objectTransform: {
       position: [1.2, -0.05, -0.75],
       rotation: [0.35, 1.25, -0.35],
@@ -71,78 +71,6 @@ export const sectionAnchors: Record<SectionSlug, SceneAnchor> = {
       orbitBoost: 0.42,
       wirePulse: 0.026,
       driftStrength: 0.022,
-    },
-  },
-  outcomes: {
-    objectTransform: {
-      position: [-0.6, 0.1, -0.6],
-      rotation: [0.4, -1.1, 0.22],
-      scale: [1.15, 1.15, 1.15],
-    },
-    materialPreset: "neon",
-    cameraHint: {
-      position: [0.2, 0.05, 5.4],
-      fov: 45,
-    },
-    mouseProfile: {
-      xStrength: 0.24,
-      yStrength: 0.2,
-      rotationStrength: 0.16,
-      smoothing: 0.1,
-    },
-    timelinePreset: "staggered",
-    microMotion: {
-      orbitBoost: 0.34,
-      wirePulse: 0.024,
-      driftStrength: 0.018,
-    },
-  },
-  testimonials: {
-    objectTransform: {
-      position: [0.8, 0.05, -0.7],
-      rotation: [0.2, 0.35, 0.4],
-      scale: [1.18, 1.18, 1.18],
-    },
-    materialPreset: "matte",
-    cameraHint: {
-      position: [0.2, 0.02, 5.3],
-      fov: 46,
-    },
-    mouseProfile: {
-      xStrength: 0.18,
-      yStrength: 0.16,
-      rotationStrength: 0.1,
-      smoothing: 0.12,
-    },
-    timelinePreset: "softReveal",
-    microMotion: {
-      orbitBoost: 0.14,
-      wirePulse: 0.015,
-      driftStrength: 0.012,
-    },
-  },
-  team: {
-    objectTransform: {
-      position: [-0.4, -0.2, -0.55],
-      rotation: [0.05, -0.85, -0.08],
-      scale: [1.1, 1.1, 1.1],
-    },
-    materialPreset: "glass",
-    cameraHint: {
-      position: [0.1, -0.18, 5.2],
-      fov: 50,
-    },
-    mouseProfile: {
-      xStrength: 0.2,
-      yStrength: 0.15,
-      rotationStrength: 0.1,
-      smoothing: 0.11,
-    },
-    timelinePreset: "hero",
-    microMotion: {
-      orbitBoost: 0.26,
-      wirePulse: 0.02,
-      driftStrength: 0.018,
     },
   },
   faq: {

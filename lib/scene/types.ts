@@ -1,10 +1,7 @@
 export type SectionSlug =
   | "hero"
-  | "mission"
-  | "process"
-  | "outcomes"
-  | "testimonials"
-  | "team"
+  | "about"
+  | "projects"
   | "faq"
   | "contact";
 

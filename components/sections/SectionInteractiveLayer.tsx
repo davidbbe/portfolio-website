@@ -5,13 +5,13 @@ import { SECTION_ORDER } from "@/lib/scene/sceneConfig";
 import { useEffect, useMemo, useRef } from "react";
 import type { SectionSlug } from "@/lib/scene/types";
 
-const sectionTone: Record<SectionSlug, { scale: number; hue: number; blend: string }> = {
+const sectionTone: Record<
+  SectionSlug,
+  { scale: number; hue: number; blend: string }
+> = {
   hero: { scale: 1.2, hue: 210, blend: "screen" },
-  mission: { scale: 1.08, hue: 190, blend: "lighten" },
-  process: { scale: 1.25, hue: 255, blend: "screen" },
-  outcomes: { scale: 1.03, hue: 152, blend: "plus-lighter" },
-  testimonials: { scale: 0.95, hue: 25, blend: "lighten" },
-  team: { scale: 1.06, hue: 300, blend: "screen" },
+  about: { scale: 1.08, hue: 190, blend: "lighten" },
+  projects: { scale: 1.25, hue: 255, blend: "screen" },
   faq: { scale: 0.98, hue: 220, blend: "lighten" },
   contact: { scale: 1.11, hue: 350, blend: "screen" },
 };
@@ -28,7 +28,9 @@ export default function SectionInteractiveLayer() {
     const finePointer =
       window.matchMedia("(hover: hover)").matches &&
       window.matchMedia("(pointer: fine)").matches;
-    const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const prefersReducedMotion = window.matchMedia(
+      "(prefers-reduced-motion: reduce)",
+    ).matches;
     if (!finePointer || prefersReducedMotion) {
       if (dotRef.current) {
         dotRef.current.style.opacity = "0";
@@ -48,7 +50,8 @@ export default function SectionInteractiveLayer() {
       if (dot) {
         dot.style.transform = `translate3d(${mouseRef.current.x - 60}px, ${mouseRef.current.y - 60}px, 0) scale(${tone.scale})`;
         dot.style.filter = `hue-rotate(${tone.hue}deg)`;
-        dot.style.mixBlendMode = tone.blend as CSSStyleDeclaration["mixBlendMode"];
+        dot.style.mixBlendMode =
+          tone.blend as CSSStyleDeclaration["mixBlendMode"];
       }
       rafRef.current = requestAnimationFrame(loop);
     };

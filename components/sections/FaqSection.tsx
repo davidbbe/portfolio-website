@@ -1,14 +1,14 @@
 "use client";
 
 import RevealText from "./shared/RevealText";
-import { faqItems, footerContact } from "@/lib/content/sections";
+import { faqItems } from "@/lib/content/sections";
 
 export default function FaqSection() {
   return (
     <section
       id="faq"
       data-scene-section="faq"
-      data-reveal-variant="hero"
+      data-reveal-variant="softReveal"
       className="creative-section"
     >
       <p data-reveal className="eyebrow eyebrow--overline">
@@ -19,21 +19,13 @@ export default function FaqSection() {
       </RevealText>
       <div className="faq-list">
         {faqItems.map((faq) => (
-          <details key={faq.question} className="faq-item">
-            <summary>{faq.question}</summary>
-            <p>{faq.answer}</p>
-          </details>
+          <article key={faq.question} className="faq-item" data-reveal>
+            <div>
+              <h3 className="text-xl font-medium mb-2">{faq.question}</h3>
+              <p className="text-base text-gray-600">{faq.answer}</p>
+            </div>
+          </article>
         ))}
-      </div>
-      <div className="contact-cta">
-        <p data-reveal>{footerContact.body}</p>
-        <a
-          data-reveal
-          href="#contact"
-          className="creative-btn creative-btn--solid"
-        >
-          {footerContact.title}
-        </a>
       </div>
     </section>
   );

@@ -2,11 +2,8 @@ import type { SectionSlug } from "./types";
 
 export const SECTION_ORDER: SectionSlug[] = [
   "hero",
-  "mission",
-  "process",
-  "outcomes",
-  "testimonials",
-  "team",
+  "about",
+  "projects",
   "faq",
   "contact",
 ];

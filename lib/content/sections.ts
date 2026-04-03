@@ -8,39 +8,26 @@ export const heroSection = {
   ],
 };
 
-export const missionFeatures = [
+export const aboutMe = [
   {
-    title: "Brand Partnerships",
-    body: "We craft strategic partnerships that boost both earnings and engagement, using a scalable playbook, creator-matching intelligence, and practical negotiation guidance.",
-    variant: "partnerships",
+    title: "Preferred Stack",
+    body: "React, Next.js, TypeScript, Tailwind, Node.js, Prisma, and PostgreSQL."
   },
   {
-    title: "New Revenue",
-    body: "We audit your business structure, identify the highest-leverage opportunities, and design systems that increase revenue while reducing overhead in day-to-day operations.",
-    variant: "revenue",
+    title: "Other Familiar Frameworks",
+    body: "Remix, Shopify theme & app development, Gatsby.js, WordPress theme development, and more.",
   },
   {
-    title: "Creator Ventures",
-    body: "We partner with standout creators through capital and expertise, helping launch and scale creator-led ventures with real operational support.",
-    variant: "ventures",
+    title: "Hosting & Development Tools",
+    body: "Vercel, Netlify, Supabase, Vite, Cursor code editor, MacBook, and more.",
   },
 ] as const;
 
-export const processSteps = [
+export const projects = [
   {
     step: "01",
-    title: "Introductory Call",
+    title: "Discovery",
     body: "We start with a focused conversation to understand your goals, constraints, and growth vision. From there, we outline a practical roadmap.",
-  },
-  {
-    step: "02",
-    title: "Onboarding",
-    body: "You meet your dedicated team and resources. We align on sponsorship objectives, current revenue stack, and strategic priorities.",
-  },
-  {
-    step: "03",
-    title: "Project Sessions",
-    body: "When opportunities appear, we launch focused sessions for monetization, audience growth, and execution support with clear milestones.",
   },
   {
     step: "04",
@@ -54,72 +41,17 @@ export const processSteps = [
   },
 ] as const;
 
-export const outcomeMetrics = [
-  {
-    value: "150+",
-    label: "Creators trust us",
-  },
-  {
-    value: "3x",
-    label: "Revenue growth focus",
-  },
-  {
-    value: "24/7",
-    label: "Operational support model",
-  },
-] as const;
-
-export const outcomeWords = ["increase your revenue", "Grow your audience", "Reduce your workload"] as const;
-
-export const testimonials = [
-  {
-    quote:
-      "I've been very happy with the service and recommended them to others. The contract and deal flow support has been more than I could handle on my own.",
-    author: "Zac Builds",
-  },
-  {
-    quote:
-      "They made creator-first growth feel manageable and deliberate. I can now treat this as a real business instead of patching things together.",
-    author: "Man Made",
-  },
-  {
-    quote:
-      "Availability and clarity are what stand out. Questions get answered quickly and campaigns move forward even when schedules are chaotic.",
-    author: "Living with Cambriea",
-  },
-] as const;
-
-export const teamMembers = [
-  "Natalie Robinson — Sr. Talent Manager",
-  "Ben Mercado — Manager Assistant Lead",
-  "Brianna Squire — Sr. Talent Manager",
-  "David Ciampittiello — General Manager",
-  "Savannah McVay — Director of Creator Relations",
-  "Regina Martiarena — Sr. Talent Manager",
-  "Niamh Higgins — Sr. Talent Manager",
-] as const;
-
 export const faqItems = [
   {
-    question: "How does your program work?",
+    question: "Are you available for work?",
     answer:
-      "We integrate with your business like an extension of your team, helping with partnership management, contract strategy, growth planning, and brand development.",
+      "Yes, I am available for work. I am currently looking for a new opportunity. Please contact me if you have any questions.",
   },
   {
-    question: "What kinds of creators do you represent?",
+    question: "What is your process for building a project?",
     answer:
-      "Creators who are ready to professionalize their operations and scale sustainably across sponsorship, audience growth, and new revenue channels.",
-  },
-  {
-    question: "What makes you different?",
-    answer:
-      "A business-first stance: we build durable creative businesses, not just one-off partnerships, with operational support that compounds over time.",
-  },
-  {
-    question: "How do I get started?",
-    answer:
-      "Apply through the action form and share your goals and context. We review each submission and invite only those that align with our team model and timeline.",
-  },
+      "I start with a focused conversation to understand your goals, constraints, and growth vision. From there, I outline a practical roadmap that fits your needs, timeline, and budget.",
+  }
 ] as const;
 
 export const footerContact = {

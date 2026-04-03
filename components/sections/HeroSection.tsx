@@ -130,13 +130,7 @@ export default function HeroSection() {
     >
       <nav data-hero-nav className="creative-hero__nav">
         <a href="/" className="creative-hero__logo" aria-label="home">
-          <Image
-            src="/images/site-logo.svg"
-            alt="Site logo"
-            width={90}
-            height={24}
-            priority
-          />
+          <span className="creative-hero__logo-text">David Beauchamp</span>
         </a>
         <a
           href="#testimonials"
@@ -145,7 +139,7 @@ export default function HeroSection() {
         >
           <Image
             src="/android-chrome-192x192.png"
-            alt=""
+            alt="Site logo"
             width={28}
             height={28}
             priority
@@ -158,7 +152,7 @@ export default function HeroSection() {
           <h1 className="creative-hero__heading">
             <span className="creative-hero__heading-clip">
               <span data-hero-line className="creative-hero__heading-line">
-                David Beauchamp
+                Full-stack Developer
               </span>
             </span>
           </h1>
@@ -177,9 +171,7 @@ export default function HeroSection() {
             <h1 className="creative-hero__heading creative-hero__heading--right">
               <span className="creative-hero__heading-clip">
                 <span data-hero-line className="creative-hero__heading-line">
-                  Full-stack<span className="inline md:hidden">&nbsp;</span>
-                  <br className="hidden md:block" />
-                  Developer
+                  Javascript
                 </span>
               </span>
             </h1>
