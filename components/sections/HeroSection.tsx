@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useCallback } from "react";
 import Image from "next/image";
 import gsap from "gsap";
 import { heroSection } from "@/lib/content/sections";
@@ -15,6 +15,34 @@ const CREATOR_AVATARS = [
 export default function HeroSection() {
   const sectionRef = useRef<HTMLElement>(null);
   const hasAnimated = useRef(false);
+  const btnWrapRef = useRef<HTMLDivElement>(null);
+  const glowRef = useRef<HTMLDivElement>(null);
+
+  const startBorderOrbit = useCallback(() => {
+    const wrap = btnWrapRef.current;
+    const glow = glowRef.current;
+    if (!wrap || !glow) return;
+
+    const proxy = { angle: 0 };
+    const rect = wrap.getBoundingClientRect();
+    const rx = rect.width / 2;
+    const ry = rect.height / 2;
+
+    gsap.to(proxy, {
+      angle: 360,
+      duration: 4,
+      repeat: -1,
+      ease: "none",
+      onUpdate() {
+        const rad = (proxy.angle * Math.PI) / 180;
+        const gradAngle = proxy.angle + 245;
+        wrap.style.backgroundImage = `linear-gradient(${gradAngle}deg, rgb(56, 219, 255), rgb(0, 0, 0))`;
+        const x = Math.cos(rad) * rx;
+        const y = Math.sin(rad) * ry;
+        glow.style.transform = `translate3d(${x}px, ${y}px, 0)`;
+      },
+    });
+  }, []);
 
   useEffect(() => {
     if (hasAnimated.current) return;
@@ -49,6 +77,7 @@ export default function HeroSection() {
       subLines.forEach((el) => {
         el.style.transform = "translateY(0)";
       });
+      startBorderOrbit();
       return;
     }
 
@@ -83,12 +112,13 @@ export default function HeroSection() {
         1.0,
       )
       .to(trust, { yPercent: 0, duration: 0.8, ease: "power3.out" }, 1.1)
-      .to(cta, { opacity: 1, y: 0, duration: 0.7, ease: "power3.out" }, 1.25);
+      .to(cta, { opacity: 1, y: 0, duration: 0.7, ease: "power3.out" }, 1.25)
+      .call(startBorderOrbit, undefined, 1.6);
 
     return () => {
       tl.kill();
     };
-  }, []);
+  }, [startBorderOrbit]);
 
   return (
     <section
@@ -172,15 +202,23 @@ export default function HeroSection() {
 
           <div className="creative-hero__trust-clip">
             <span data-hero-trust className="creative-hero__trust">
-              150+ creators trust us
+              Production-ready applications
             </span>
           </div>
 
           <div data-hero-cta className="creative-hero__cta-wrap">
-            <a href={heroSection.ctas[0].href} className="creative-hero__cta">
-              <span>{heroSection.ctas[0].label}</span>
-              <span className="creative-hero__cta-border" />
-            </a>
+            <div ref={btnWrapRef} className="creative-hero__cta-orbit">
+              <a href={heroSection.ctas[0].href} className="creative-hero__cta">
+                {heroSection.ctas[0].label}
+              </a>
+              <div className="creative-hero__cta-bg">
+                <div ref={glowRef} className="creative-hero__cta-glow-group">
+                  <div className="creative-hero__cta-g creative-hero__cta-g--1" />
+                  <div className="creative-hero__cta-g creative-hero__cta-g--2" />
+                  <div className="creative-hero__cta-g creative-hero__cta-g--3" />
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </div>
