@@ -3,7 +3,7 @@ export const heroSection = {
     "I specialize in building high-performance web applications using React, Next.js, TypeScript, and motion animation libraries like GSAP, Framer Motion, and Three.js.",
   ],
   ctas: [
-    { label: "View my work", href: "/portfolio" },
+    { label: "View my work", href: "/#projects" },
     { label: "Contact me", href: "/contact" },
   ],
 };
@@ -28,7 +28,7 @@ export const aboutMe: AboutMeCategory[] = [
       { name: "Tailwind", icon: "tailwind" },
       { name: "Node.js", icon: "nodejs" },
       { name: "Prisma", icon: "prisma" },
-      { name: "PostgreSQL", icon: "postgresql" },
+      { name: "PostgreSQL", icon: "postgresql" }
     ],
   },
   {
@@ -38,6 +38,9 @@ export const aboutMe: AboutMeCategory[] = [
       { name: "Shopify", icon: "shopify" },
       { name: "Gatsby.js", icon: "gatsby" },
       { name: "WordPress", icon: "wordpress" },
+      { name: "Stripe", icon: "stripe" },
+      { name: "Contentful", icon: "contentful" },
+      { name: "Strapi", icon: "strapi" },
     ],
   },
   {
@@ -45,9 +48,12 @@ export const aboutMe: AboutMeCategory[] = [
     brands: [
       { name: "Vercel", icon: "vercel" },
       { name: "Netlify", icon: "netlify" },
+      { name: "Neon Database", icon: "neon" },
       { name: "Supabase", icon: "supabase" },
       { name: "Vite", icon: "vite" },
       { name: "Cursor", icon: "cursor" },
+      { name: "Capacitor", icon: "capacitor" },
+      { name: "Figma", icon: "figma" }
     ],
   },
 ];

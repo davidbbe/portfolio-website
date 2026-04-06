@@ -238,6 +238,86 @@
   margin-left: -10px;
 }
 
+.creative-hero__tech-logos {
+  display: flex;
+  align-items: center;
+}
+
+.creative-hero__tech-logo {
+  position: relative;
+  width: 44px;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  border-radius: 50%;
+  border: 2px solid var(--creative-line-soft);
+  background: rgba(10, 16, 30, 0.6);
+  transition:
+    transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1),
+    border-color 0.25s ease;
+}
+
+.creative-hero__tech-logo::before {
+  content: "";
+  position: absolute;
+  inset: -8px;
+  border-radius: 50%;
+}
+
+.creative-hero__tech-logo + .creative-hero__tech-logo {
+  margin-left: -10px;
+}
+
+.creative-hero__tech-logo:hover {
+  transform: translateY(-8px);
+  border-color: var(--creative-line-strong);
+}
+
+.creative-hero__tech-logo svg {
+  width: 22px;
+  height: 22px;
+  flex-shrink: 0;
+}
+
+.creative-hero__tech-tooltip {
+  position: absolute;
+  bottom: calc(100% + 10px);
+  left: 50%;
+  transform: translateX(-50%) translateY(4px);
+  background: rgba(10, 16, 30, 0.92);
+  color: var(--creative-text);
+  font-family: var(--font-sora), sans-serif;
+  font-size: 0.72rem;
+  font-weight: 500;
+  letter-spacing: 0.03em;
+  padding: 5px 10px;
+  border-radius: 6px;
+  white-space: nowrap;
+  pointer-events: none;
+  opacity: 0;
+  border: 1px solid var(--creative-line-soft);
+  transition:
+    opacity 0.25s ease,
+    transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.creative-hero__tech-tooltip::after {
+  content: "";
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  border: 5px solid transparent;
+  border-top-color: rgba(10, 16, 30, 0.92);
+}
+
+.creative-hero__tech-logo:hover .creative-hero__tech-tooltip {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}
+
 .creative-hero__trust-clip {
   overflow: hidden;
 }
@@ -385,7 +465,7 @@
   }
 
   .creative-hero__nav {
-    padding: 1.25rem 0;
+    padding: 1.25rem 1.35rem;
   }
 
   .creative-hero__heading {
@@ -674,7 +754,9 @@
 }
 
 @keyframes contactDotPulse {
-  0%, 60%, 100% {
+  0%,
+  60%,
+  100% {
     opacity: 0.25;
     transform: scale(1);
   }
@@ -708,12 +790,26 @@
 }
 
 @keyframes contactShake {
-  0% { opacity: 0; transform: translateX(0); }
-  20% { opacity: 1; transform: translateX(-5px); }
-  40% { transform: translateX(4px); }
-  60% { transform: translateX(-3px); }
-  80% { transform: translateX(2px); }
-  100% { transform: translateX(0); }
+  0% {
+    opacity: 0;
+    transform: translateX(0);
+  }
+  20% {
+    opacity: 1;
+    transform: translateX(-5px);
+  }
+  40% {
+    transform: translateX(4px);
+  }
+  60% {
+    transform: translateX(-3px);
+  }
+  80% {
+    transform: translateX(2px);
+  }
+  100% {
+    transform: translateX(0);
+  }
 }
 
 .creative-section::before {
