@@ -7,6 +7,7 @@ import AboutMeSection from "./sections/AboutMeSection";
 import ProjectsSection from "./sections/ProjectsSection";
 import FaqSection from "./sections/FaqSection";
 import ContactSection from "./sections/ContactSection";
+import FooterSection from "./sections/FooterSection";
 import SectionInteractiveLayer from "./sections/SectionInteractiveLayer";
 
 export default function CreativePortfolioPage() {
@@ -23,6 +24,7 @@ export default function CreativePortfolioPage() {
         <FaqSection />
         <ContactSection />
       </main>
+      <FooterSection />
     </>
   );
 }

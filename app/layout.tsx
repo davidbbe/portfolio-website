@@ -5,9 +5,17 @@ import AppProviders from "@/components/providers/app-providers";
 import GlobalSceneCanvas from "@/components/canvas/GlobalSceneCanvas";
 import { GoogleAnalytics } from "@next/third-parties/google";
 
+const siteUrl =
+  process.env.NEXT_PUBLIC_SITE_URL ||
+  (process.env.VERCEL_URL
+    ? `https://${process.env.VERCEL_URL}`
+    : "http://localhost:3000");
+
 export const metadata: Metadata = {
-  title: "Creative Portfolio",
-  description: "Premium frontend engineering and immersive web experiences.",
+  metadataBase: new URL(siteUrl),
+  title: "David Beauchamp's developer portfolio",
+  description:
+    "I am a full-stack developer with a passion for building web applications. I am currently looking for a new opportunity. Please contact me if you have any questions or would like to discuss a potential project.",
   manifest: "/site.webmanifest",
   icons: {
     icon: [
@@ -16,6 +24,20 @@ export const metadata: Metadata = {
     ],
     apple: "/apple-touch-icon.png",
     shortcut: "/favicon.ico",
+  },
+  openGraph: {
+    images: [
+      {
+        url: "/meta-share.jpg",
+        width: 1024,
+        height: 1024,
+        alt: "David Beauchamp's developer portfolio",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    images: ["/meta-share.jpg"],
   },
 };
 
@@ -29,7 +51,7 @@ export default function RootLayout({
       lang="en"
       className={`${sora.variable} ${manrope.variable} antialiased`}
     >
-      <body className="creative-body" style={{ backgroundColor: "#06080f" }}>
+      <body className="creative-body">
         <AppProviders>
           <GlobalSceneCanvas />
           {children}

@@ -28,32 +28,37 @@ export const aboutMe: AboutMeCategory[] = [
       { name: "Tailwind", icon: "tailwind" },
       { name: "Node.js", icon: "nodejs" },
       { name: "Prisma", icon: "prisma" },
-      { name: "PostgreSQL", icon: "postgresql" }
+      { name: "PostgreSQL", icon: "postgresql" },
+      { name: "Vercel", icon: "vercel" }
     ],
   },
   {
-    title: "Other Familiar Frameworks",
+    title: "Other Stacks I know",
     brands: [
-      { name: "Remix", icon: "remix" },
+      { name: "Netlify", icon: "netlify" },
+      { name: "Neon Database", icon: "neon" },
+      { name: "Supabase", icon: "supabase" },
       { name: "Shopify", icon: "shopify" },
+      { name: "Remix", icon: "remix" },
       { name: "Gatsby.js", icon: "gatsby" },
       { name: "WordPress", icon: "wordpress" },
-      { name: "Stripe", icon: "stripe" },
       { name: "Contentful", icon: "contentful" },
       { name: "Strapi", icon: "strapi" },
     ],
   },
   {
-    title: "Hosting & Development Tools",
+    title: "Tools I use",
     brands: [
-      { name: "Vercel", icon: "vercel" },
-      { name: "Netlify", icon: "netlify" },
-      { name: "Neon Database", icon: "neon" },
-      { name: "Supabase", icon: "supabase" },
+      { name: "Stripe", icon: "stripe" },
+      { name: "Three.js", icon: "threejs" },
+      { name: "GSAP", icon: "gsap" },
+      { name: "Motion Animation Libraries", icon: "motion" },
       { name: "Vite", icon: "vite" },
       { name: "Cursor", icon: "cursor" },
       { name: "Capacitor", icon: "capacitor" },
-      { name: "Figma", icon: "figma" }
+      { name: "Figma", icon: "figma" },
+      { name: "Xcode", icon: "xcode" },
+      { name: "Android Studio", icon: "androidstudio" }
     ],
   },
 ];
@@ -68,12 +73,34 @@ export const faqItems = [
     question: "What is your process for building a project?",
     answer:
       "I start with a focused conversation to understand your goals, constraints, and growth vision. From there, I outline a practical roadmap that fits your needs, timeline, and budget.",
-  }
+  },
+  {
+    question: "Are you active on GitHub?",
+    answer:
+      "Yes, I am active on GitHub. You can find my [Github profile here](https://github.com/davidbbe). Most of my work with clients and some of my personal projects are private, but I have a few public repositories that you can check out.",
+    image: "/images/github-history.jpg",
+  },
 ] as const;
 
 export const footerContact = {
   title: "Send me a message",
   body: "I am always looking for new opportunities. Please contact me if you have any questions or would like to discuss a potential project. I will get back to you as soon as possible.",
+};
+
+export const socialLinks = {
+  intro: "You can also find me on GitHub and LinkedIn — feel free to reach out or follow my work there.",
+  links: [
+    {
+      label: "GitHub",
+      href: "https://github.com/davidbbe",
+      icon: "github",
+    },
+    {
+      label: "LinkedIn",
+      href: "https://www.linkedin.com/in/david-beauchamp-91307285/",
+      icon: "linkedin",
+    },
+  ],
 };
 
 export type ProjectItem = {
