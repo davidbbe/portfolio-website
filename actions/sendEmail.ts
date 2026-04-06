@@ -28,6 +28,8 @@ export async function sendContactFormEmail(formData: FormData) {
     return { error: "Invalid message" };
   }
 
+  const replyTo = senderEmail.trim();
+
   const to = process.env.CONTACT_INBOX_EMAIL ?? DEFAULT_TO;
   const from = process.env.RESEND_FROM ?? DEFAULT_FROM;
 
@@ -36,6 +38,7 @@ export async function sendContactFormEmail(formData: FormData) {
     const data = await resend.emails.send({
       from,
       to,
+      replyTo,
       subject: "Message from portfolio contact form",
       react: React.createElement(ContactFormEmail, {
         message,

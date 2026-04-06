@@ -73,7 +73,9 @@ export default function SectionInteractiveLayer() {
       <ol className="section-index">
         {SECTION_ORDER.map((slug) => (
           <li key={slug} className={slug === activeSection ? "is-active" : ""}>
-            {slug}
+            <a href={`#${slug}`} className="section-index__link">
+              {slug}
+            </a>
           </li>
         ))}
       </ol>
