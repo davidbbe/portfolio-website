@@ -1,9 +1,59 @@
 "use client";
 
+import { useRef, useEffect } from "react";
+import gsap from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
 import RevealText from "./shared/RevealText";
+import BrandIcon from "./shared/BrandIcon";
 import { aboutMe } from "@/lib/content/sections";
 
+gsap.registerPlugin(ScrollTrigger);
+
 export default function AboutMeSection() {
+  const gridRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const grid = gridRef.current;
+    if (!grid) return;
+
+    const prefersReducedMotion = window.matchMedia(
+      "(prefers-reduced-motion: reduce)"
+    ).matches;
+
+    if (prefersReducedMotion) return;
+
+    const cards = grid.querySelectorAll<HTMLElement>(".service-card");
+
+    const ctx = gsap.context(() => {
+      cards.forEach((card) => {
+        const brandItems =
+          card.querySelectorAll<HTMLElement>(".brand-list__item");
+
+        if (brandItems.length === 0) return;
+
+        gsap.set(brandItems, { autoAlpha: 0, y: 18, scale: 0.92 });
+
+        ScrollTrigger.create({
+          trigger: card,
+          start: "top 82%",
+          once: true,
+          onEnter: () => {
+            gsap.to(brandItems, {
+              autoAlpha: 1,
+              y: 0,
+              scale: 1,
+              duration: 0.5,
+              stagger: 0.07,
+              ease: "power2.out",
+            });
+          },
+        });
+      });
+    }, grid);
+
+    return () => ctx.revert();
+  }, []);
+
   return (
     <section
       id="about"
@@ -34,11 +84,17 @@ export default function AboutMeSection() {
         & app development. I am always looking to learn new technologies and
         stay up to date with the latest trends in the industry.
       </p>
-      <div className="service-grid">
-        {aboutMe.map((feature) => (
-          <article key={feature.title} className="service-card" data-reveal>
-            <h3>{feature.title}</h3>
-            <p>{feature.body}</p>
+      <div className="service-grid" ref={gridRef}>
+        {aboutMe.map((category) => (
+          <article key={category.title} className="service-card" data-reveal>
+            <h3>{category.title}</h3>
+            <ul className="brand-list">
+              {category.brands.map((brand) => (
+                <li key={brand.name} className="brand-list__item">
+                  <BrandIcon iconKey={brand.icon} name={brand.name} />
+                </li>
+              ))}
+            </ul>
           </article>
         ))}
       </div>

@@ -865,6 +865,62 @@
   line-height: 1.6;
 }
 
+/* ── Brand logo list inside service cards ── */
+
+.brand-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+}
+
+.brand-list__item {
+  visibility: hidden;
+}
+
+.brand-icon {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.35rem 0.65rem;
+  border-radius: 0.55rem;
+  border: 1px solid var(--creative-line-soft);
+  background: rgba(12, 18, 35, 0.55);
+  font-size: 0.82rem;
+  color: var(--creative-muted);
+  white-space: nowrap;
+  transition:
+    border-color 0.25s ease,
+    color 0.25s ease,
+    background 0.25s ease;
+}
+
+.brand-icon svg {
+  width: 1rem;
+  height: 1rem;
+  flex-shrink: 0;
+  color: rgba(157, 183, 255, 0.7);
+  transition: color 0.25s ease;
+}
+
+.brand-icon:hover {
+  border-color: var(--creative-line-strong);
+  color: var(--creative-text);
+  background: rgba(20, 30, 55, 0.7);
+}
+
+.brand-icon:hover svg {
+  color: #9dcfff;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .brand-list__item {
+    visibility: visible !important;
+  }
+}
+
 .service-card__tag {
   font-size: 0.68rem;
   letter-spacing: 0.14em;
