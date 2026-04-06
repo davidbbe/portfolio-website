@@ -16,6 +16,10 @@ import {
   SiNetlify,
   SiSupabase,
   SiVite,
+  SiGreensock,
+  SiThreedotjs,
+  SiCapacitor,
+  SiGooglemaps,
 } from "react-icons/si";
 import { HiCommandLine } from "react-icons/hi2";
 import type { IconType } from "react-icons";
@@ -37,7 +41,38 @@ const iconMap: Record<string, IconType> = {
   supabase: SiSupabase,
   vite: SiVite,
   cursor: HiCommandLine,
+  gsap: SiGreensock,
+  threejs: SiThreedotjs,
+  capacitor: SiCapacitor,
+  googlemaps: SiGooglemaps,
 };
+
+const tagNameToIconKey: Record<string, string> = {
+  "React": "react",
+  "Next.js": "nextjs",
+  "TypeScript": "typescript",
+  "Tailwind": "tailwind",
+  "Node.js": "nodejs",
+  "Prisma": "prisma",
+  "PostgreSQL": "postgresql",
+  "Remix": "remix",
+  "Shopify": "shopify",
+  "Gatsby.js": "gatsby",
+  "WordPress": "wordpress",
+  "Vercel": "vercel",
+  "Netlify": "netlify",
+  "Supabase": "supabase",
+  "Vite": "vite",
+  "GSAP": "gsap",
+  "Three.js": "threejs",
+  "Capacitor": "capacitor",
+  "Google Maps API": "googlemaps",
+  "Google Places API": "googlemaps",
+};
+
+export function resolveTagIconKey(tagName: string): string | undefined {
+  return tagNameToIconKey[tagName];
+}
 
 type BrandIconProps = {
   iconKey: string;

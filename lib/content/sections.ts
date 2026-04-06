@@ -52,24 +52,6 @@ export const aboutMe: AboutMeCategory[] = [
   },
 ];
 
-export const projects = [
-  {
-    step: "01",
-    title: "Discovery",
-    body: "We start with a focused conversation to understand your goals, constraints, and growth vision. From there, we outline a practical roadmap.",
-  },
-  {
-    step: "04",
-    title: "Ongoing Support",
-    body: "As programs evolve, we check in regularly with measurable updates, ensuring campaign flow, performance, and partnerships stay on trajectory.",
-  },
-  {
-    step: "05",
-    title: "Performance Iteration",
-    body: "You get direct access to leadership input and review cadence to refine strategy, strengthen positioning, and raise outcomes over time.",
-  },
-] as const;
-
 export const faqItems = [
   {
     question: "Are you available for work?",
@@ -88,19 +70,48 @@ export const footerContact = {
   body: "I am always looking for new opportunities. Please contact me if you have any questions or would like to discuss a potential project. I will get back to you as soon as possible.",
 };
 
-export const projectsData = [
+export type ProjectItem = {
+  title: string;
+  url: string;
+  description: string;
+  image: string;
+  featuredTags: readonly string[];
+  tags: readonly string[];
+};
+
+export const projectsData: readonly ProjectItem[] = [
   {
     title: "Underwater Hockey Map",
     url: "https://uwhmap.com",
     description: "I designed and developed this application. It uses the Google Maps API and Google Places API to view, create, or edit underwater hockey clubs around the world. It has features like login, user accounts, and CRUD functionality for users to dynamically manage the database and pages.",
-    tags: ["Next.js", "NextAuth", "Prisma", "PostgreSQL", "Vercel", "Google Maps API", "Google Places API", "Tailwind", "Shadcn", "React Query"]
+    image: "/images/portfolio/Underwater-Hockey-Map.jpg",
+    featuredTags: ["Next.js", "Google Maps API", "Google Places API"],
+    tags: ["Next.js", "NextAuth", "Prisma", "PostgreSQL", "Vercel", "Google Maps API", "Google Places API", "Tailwind", "Shadcn", "React Query"],
   },
   {
     title: "Netflix Roulette",
     url: "https://tvroulette.app",
     description: "I designed and developed this application. It uses the IMDB, TMDB, OMDB, and JustWatch APIs to search for movies and TV shows. It features an interactive UI with multiple animations to retain user attention and engagement. This website has over 1.3k active monthy users and ranks very high on Google for the search term 'Netflix Roulette'.",
-    tags: ["Gatsby.js", "GSAP", "Styled Components", "React Query", "Contentful CMS", "Netlify", "IMDB API", "TMDB API", "OMDB API", "JustWatch API"]
-  }
+    image: "/images/portfolio/Netflix-Roulette.jpg",
+    featuredTags: ["Gatsby.js", "GSAP", "OMDB API"],
+    tags: ["Gatsby.js", "GSAP", "Styled Components", "React Query", "Contentful CMS", "Netlify", "IMDB API", "OMDB API"],
+  },
+  {
+    title: "Skate Dog (game app)",
+    url: "https://skatedog.daveb.co",
+    description: "I designed and developed this game. It is a simple game that uses Three.js to create a 3D environment and physics simulation. Its available as a web app and as a direct download native app for either iOS or Android. The native app is built with Capacitor and Neon NoSQL for the high score database.",
+    image: "/images/portfolio/Skate-Dog-the-game.jpg",
+    featuredTags: ["Vite", "Three.js", "Capacitor"],
+    tags: ["React", "Vite", "Tailwind", "Three.js", "Capacitor", "PostgreSQL", "Neon Database", "Vercel"],
+  },
+  {
+    title: "Restaurant Roulette",
+    url: "https://www.restaurantroulette.app",
+    description: "I designed and developed this application. It uses the Google Places API and Google Maps API to search for restaurants around the user's location.",
+    image: "/images/portfolio/Restaurant-Roulette.jpg",
+    featuredTags: ["Next.js", "Google Maps API", "Google Places API"],
+    tags: ["Next.js", "Google Maps API", "Google Places API", "Vercel", "Tailwind", "Shadcn", "React Query"],
+  },
 ] as const;
 
 export const skillsData = [
