@@ -25,3 +25,6 @@ export const POST_FX_CONFIG = {
   noiseOpacity: 0.07,
   chromaticOffset: 0.0007,
 };
+
+/** glTF/glb path under `public/` — hero 3D scan */
+export const HERO_SCENE_MODEL_GLB = "/models/hero-bust.glb";

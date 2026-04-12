@@ -1,29 +1,32 @@
 "use client";
 
+import { Environment } from "@react-three/drei";
 import { Canvas } from "@react-three/fiber";
-import { useEffect, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import SceneObjectManager from "./SceneObjectManager";
 import SceneRig from "./SceneRig";
 import PostFX from "./effects/PostFX";
 
 export default function GlobalSceneCanvas() {
   const [isEnabled, setIsEnabled] = useState(false);
+  const [isNarrowViewport, setIsNarrowViewport] = useState(false);
 
   useEffect(() => {
     const motionMatch = window.matchMedia("(prefers-reduced-motion: reduce)");
-    const isMobile = window.matchMedia("(max-width: 768px)");
+    const narrowMatch = window.matchMedia("(max-width: 768px)");
 
     const update = () => {
-      setIsEnabled(!motionMatch.matches && !isMobile.matches);
+      setIsEnabled(!motionMatch.matches);
+      setIsNarrowViewport(narrowMatch.matches);
     };
 
     update();
     motionMatch.addEventListener("change", update);
-    isMobile.addEventListener("change", update);
+    narrowMatch.addEventListener("change", update);
 
     return () => {
       motionMatch.removeEventListener("change", update);
-      isMobile.removeEventListener("change", update);
+      narrowMatch.removeEventListener("change", update);
     };
   }, []);
 
@@ -38,7 +41,7 @@ export default function GlobalSceneCanvas() {
     >
       <Canvas
         shadows
-        dpr={[1, 1.7]}
+        dpr={isNarrowViewport ? [1, 1.25] : [1, 1.7]}
         gl={{ alpha: true, antialias: true }}
         onCreated={({ gl }) => {
           gl.setClearColor("#000000", 0);
@@ -53,7 +56,10 @@ export default function GlobalSceneCanvas() {
           position={[0, 2.5, 0]}
         />
         <SceneRig />
-        <SceneObjectManager />
+        <Suspense fallback={null}>
+          <Environment preset="city" />
+          <SceneObjectManager />
+        </Suspense>
         <PostFX />
       </Canvas>
     </div>
