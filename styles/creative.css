@@ -40,16 +40,17 @@
 }
 
 .canvas-shell--front {
-  z-index: 1;
+  /* Above dotfield (11), below page chrome (13+). Bust only occludes the separate dot layer. */
+  z-index: 12;
 }
 
 .canvas-shell--back {
-  z-index: 1;
+  z-index: 12;
 }
 
 .creative-main {
   position: relative;
-  z-index: 20;
+  z-index: 13;
   /* Extra scroll range so the last section’s scrubbed reveal timeline can finish. */
   padding-bottom: clamp(3rem, 11vh, 9rem);
 }
@@ -405,16 +406,32 @@
   filter: blur(6px);
 }
 
-/* ── Dot grid pattern behind hero ── */
+/* ── Dot grid behind hero only (sibling layer below WebGL, not inside main) ── */
 
-.creative-hero::before {
-  content: "";
+.creative-hero-dotfield-layer {
+  position: fixed;
+  inset: 0;
+  z-index: 11;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.45s ease;
+}
+
+.creative-hero-dotfield-layer[data-visible="true"] {
+  opacity: 1;
+}
+
+.creative-hero-dotfield-layer__inner {
   position: absolute;
   top: 45%;
   left: 50%;
   transform: translate(-50%, -50%);
   width: 50%;
   height: 50%;
+  min-width: 16rem;
+  min-height: 14rem;
+  max-width: min(90vw, 48rem);
+  max-height: min(70vh, 36rem);
   background-image: radial-gradient(
     circle,
     rgba(255, 255, 255, 0.3) 1.2px,
@@ -422,8 +439,6 @@
   );
   background-size: 32px 32px;
   opacity: 0.5;
-  pointer-events: none;
-  z-index: 0;
   mask-image: radial-gradient(
     ellipse 80% 70% at 50% 50%,
     black 20%,

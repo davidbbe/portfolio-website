@@ -10,21 +10,21 @@ export default function PostFX() {
   const isSmallViewport = window.innerWidth < 768;
 
   const bloomIntensity = isFineMotion
-    ? Math.min(POST_FX_CONFIG.bloomIntensity, isSmallViewport ? 0.32 : 0.42)
-    : 0.18;
+    ? POST_FX_CONFIG.bloomIntensity * (isSmallViewport ? 0.85 : 1)
+    : 0.1;
   const noiseOpacity = isFineMotion
-    ? Math.min(POST_FX_CONFIG.noiseOpacity, isSmallViewport ? 0.02 : 0.035)
+    ? POST_FX_CONFIG.noiseOpacity * (isSmallViewport ? 0.85 : 1)
     : 0.0;
   const chromaOffset = isFineMotion
     ? POST_FX_CONFIG.chromaticOffset
-    : POST_FX_CONFIG.chromaticOffset * 0.2;
+    : POST_FX_CONFIG.chromaticOffset * 0.15;
 
   return (
     <EffectComposer multisampling={0}>
       <Bloom
-        intensity={isNaN(bloomIntensity) ? 0.2 : bloomIntensity}
-        luminanceThreshold={0.35}
-        luminanceSmoothing={0.8}
+        intensity={isNaN(bloomIntensity) ? 0.15 : bloomIntensity}
+        luminanceThreshold={0.62}
+        luminanceSmoothing={0.35}
       />
       <Noise
         opacity={isNaN(noiseOpacity) ? 0.0 : noiseOpacity}

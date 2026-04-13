@@ -41,7 +41,7 @@ export default function GlobalSceneCanvas() {
     >
       <Canvas
         shadows
-        dpr={isNarrowViewport ? [1, 1.25] : [1, 1.7]}
+        dpr={isNarrowViewport ? [1, 1.35] : [1, 2]}
         gl={{ alpha: true, antialias: true }}
         onCreated={({ gl }) => {
           gl.setClearColor("#000000", 0);
@@ -57,7 +57,7 @@ export default function GlobalSceneCanvas() {
         />
         <SceneRig />
         <Suspense fallback={null}>
-          <Environment preset="city" />
+          <Environment preset="city" environmentIntensity={0.28} />
           <SceneObjectManager />
         </Suspense>
         <PostFX />

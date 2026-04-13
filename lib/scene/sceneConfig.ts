@@ -20,10 +20,11 @@ export const SCENE_DAMPING = {
   object: 0.1,
 };
 
+/** Lower bloom / noise / chroma keeps the photogrammetry albedo sharper (less haze / fringing). */
 export const POST_FX_CONFIG = {
-  bloomIntensity: 0.7,
-  noiseOpacity: 0.07,
-  chromaticOffset: 0.0007,
+  bloomIntensity: 0.26,
+  noiseOpacity: 0.022,
+  chromaticOffset: 0.00022,
 };
 
 /** glTF/glb path under `public/` — hero 3D scan */

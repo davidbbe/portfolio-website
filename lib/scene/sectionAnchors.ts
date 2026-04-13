@@ -27,13 +27,13 @@ export const sectionAnchors: Record<SectionSlug, SceneAnchor> = {
   },
   about: {
     objectTransform: {
-      position: [-0.9, 0.1, -0.45],
-      rotation: [0.5, 0.15, 0.2],
+      position: [0.92, 0.08, -0.48],
+      rotation: [0.48, -0.35, 0.12],
       scale: [1.15, 1.15, 1.15],
     },
     materialPreset: "matte",
     cameraHint: {
-      position: [0.15, 0.15, 5.5],
+      position: [0.22, 0.14, 5.45],
       fov: 46,
     },
     mouseProfile: {
@@ -51,13 +51,13 @@ export const sectionAnchors: Record<SectionSlug, SceneAnchor> = {
   },
   projects: {
     objectTransform: {
-      position: [1.2, -0.05, -0.75],
-      rotation: [0.35, 1.25, -0.35],
-      scale: [1.22, 1.22, 1.22],
+      position: [0, -0.05, -0.58],
+      rotation: [0.32, 0.85, -0.28],
+      scale: [1.15, 1.15, 1.15],
     },
     materialPreset: "chrome",
     cameraHint: {
-      position: [0, -0.05, 5.1],
+      position: [0, -0.05, 5.15],
       fov: 47,
     },
     mouseProfile: {
@@ -75,13 +75,13 @@ export const sectionAnchors: Record<SectionSlug, SceneAnchor> = {
   },
   faq: {
     objectTransform: {
-      position: [1.0, 0.0, -0.48],
-      rotation: [0.45, 0.22, 0.15],
-      scale: [1.2, 1.2, 1.2],
+      position: [0.95, 0.02, -0.5],
+      rotation: [0.42, -0.28, 0.12],
+      scale: [1.15, 1.15, 1.15],
     },
     materialPreset: "chrome",
     cameraHint: {
-      position: [0.1, -0.05, 5.1],
+      position: [0.18, -0.05, 5.12],
       fov: 47,
     },
     mouseProfile: {
@@ -99,13 +99,14 @@ export const sectionAnchors: Record<SectionSlug, SceneAnchor> = {
   },
   contact: {
     objectTransform: {
-      position: [0, -0.28, -0.4],
-      rotation: [-0.05, -0.45, 0.03],
-      scale: [1.16, 1.16, 1.16],
+      position: [0.95, -0.26, -0.48],
+      rotation: [-0.02, -0.38, 0.04],
+      scale: [1.15, 1.15, 1.15],
     },
-    materialPreset: "neon",
+    /** Neutral cool tint; avoid "neon" here — emissive + rim read as harsh green on the scan. */
+    materialPreset: "glass",
     cameraHint: {
-      position: [0, -0.16, 5.0],
+      position: [0.18, -0.14, 5.05],
       fov: 50,
     },
     mouseProfile: {

@@ -2,20 +2,24 @@
 
 import { useSceneState } from "@/context/scene-state-context";
 import { sectionAnchors } from "@/lib/scene/sectionAnchors";
-import { HERO_SCENE_MODEL_GLB } from "@/lib/scene/sceneConfig";
-import type { MaterialPreset } from "@/lib/scene/types";
+import { HERO_SCENE_MODEL_GLB, SECTION_ORDER } from "@/lib/scene/sceneConfig";
+import type { MaterialPreset, SectionSlug } from "@/lib/scene/types";
 import { Center, useGLTF } from "@react-three/drei";
-import { useFrame } from "@react-three/fiber";
+import { useFrame, useThree } from "@react-three/fiber";
 import gsap from "gsap";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import {
   Color,
+  Euler,
   Group,
   MathUtils,
   Mesh,
   MeshPhysicalMaterial,
   MeshStandardMaterial,
+  Object3D,
   PointLight,
+  Quaternion,
+  Texture,
 } from "three";
 
 /** How strongly section presets tint textured albedo (multiply with baseColor map). */
@@ -25,12 +29,24 @@ const TEXTURE_TINT_STRENGTH = 0.14;
 const MODEL_FORWARD_YAW_OFFSET = Math.PI;
 
 /** Scales turntable speed (rad/s) after preset `spinSpeed` × `microMotion.orbitBoost`. */
-const TURNTABLE_SPEED_MULTIPLIER = 2.2;
+const TURNTABLE_SPEED_MULTIPLIER = 5.5;
 
 /** Extra uniform scale on tablet/desktop (multiplies section `safeScale`; mobile stays 1). */
 const VIEWPORT_SCALE_MOBILE = 1;
-const VIEWPORT_SCALE_TABLET = 1.16;
-const VIEWPORT_SCALE_DESKTOP = 1.32;
+const VIEWPORT_SCALE_TABLET = 1.2;
+const VIEWPORT_SCALE_DESKTOP = 1.4;
+
+/** Hero → About: bust fades out on narrow viewports by `scrollAlong` index 1. */
+const MOBILE_HERO_FADE_POWER = 2.05;
+const MOBILE_HERO_FADE_SCALE_DROP = 0.22;
+const MOBILE_HERO_FADE_LIFT = 0.2;
+const MOBILE_HERO_FADE_WOBBLE = 0.14;
+const MOBILE_HERO_FADE_SPIN_BOOST = 4.2;
+
+/** Photogrammetry / textured scan: diffuse look, no metallic sheen or clearcoat. */
+const SCAN_METALNESS = 0;
+const SCAN_ROUGHNESS_FLOOR = 0.72;
+const SCAN_ENV_MAP_INTENSITY = 0.22;
 
 type MaterialPresetConfig = {
   color: string;
@@ -50,13 +66,13 @@ type MaterialPresetConfig = {
 const materialPresets: Record<MaterialPreset, MaterialPresetConfig> = {
   glass: {
     color: "#8cc7ff",
-    roughness: 0.38,
-    metalness: 0.14,
-    envMapIntensity: 0.72,
+    roughness: 0.72,
+    metalness: 0,
+    envMapIntensity: 0.28,
     transmission: 0,
     thickness: 0.2,
-    clearcoat: 0.42,
-    clearcoatRoughness: 0.22,
+    clearcoat: 0,
+    clearcoatRoughness: 0.35,
     spinSpeed: 0.24,
     emissiveIntensity: 0.12,
     accentLight: "#b4d4ff",
@@ -64,13 +80,13 @@ const materialPresets: Record<MaterialPreset, MaterialPresetConfig> = {
   },
   chrome: {
     color: "#c8d8ff",
-    roughness: 0.22,
-    metalness: 0.52,
-    envMapIntensity: 0.92,
+    roughness: 0.76,
+    metalness: 0,
+    envMapIntensity: 0.28,
     transmission: 0,
     thickness: 0.2,
-    clearcoat: 0.75,
-    clearcoatRoughness: 0.12,
+    clearcoat: 0,
+    clearcoatRoughness: 0.4,
     spinSpeed: 0.3,
     emissiveIntensity: 0.08,
     accentLight: "#d8e4ff",
@@ -78,12 +94,12 @@ const materialPresets: Record<MaterialPreset, MaterialPresetConfig> = {
   },
   matte: {
     color: "#9aa0b0",
-    roughness: 0.78,
-    metalness: 0.05,
-    envMapIntensity: 0.38,
+    roughness: 0.82,
+    metalness: 0,
+    envMapIntensity: 0.24,
     transmission: 0,
     thickness: 0,
-    clearcoat: 0.12,
+    clearcoat: 0,
     clearcoatRoughness: 0.55,
     spinSpeed: 0.18,
     emissiveIntensity: 0.04,
@@ -91,18 +107,18 @@ const materialPresets: Record<MaterialPreset, MaterialPresetConfig> = {
     rimIntensity: 0.38,
   },
   neon: {
-    color: "#7dffe8",
-    roughness: 0.28,
-    metalness: 0.28,
-    envMapIntensity: 0.78,
+    color: "#9ee8ff",
+    roughness: 0.7,
+    metalness: 0,
+    envMapIntensity: 0.3,
     transmission: 0,
     thickness: 0.05,
-    clearcoat: 0.55,
-    clearcoatRoughness: 0.28,
+    clearcoat: 0,
+    clearcoatRoughness: 0.4,
     spinSpeed: 0.34,
     emissiveIntensity: 0.38,
-    accentLight: "#5cffd8",
-    rimIntensity: 0.85,
+    accentLight: "#8ab8ff",
+    rimIntensity: 0.48,
   },
 };
 
@@ -120,19 +136,67 @@ type PreservedPbr = {
   physicalClearcoatRoughness: number;
 };
 
-function collectMeshMaterials(root: Mesh): (MeshStandardMaterial | MeshPhysicalMaterial)[] {
+const STANDARD_TEXTURE_SLOTS = [
+  "map",
+  "lightMap",
+  "normalMap",
+  "roughnessMap",
+  "metalnessMap",
+  "aoMap",
+  "emissiveMap",
+] as const;
+
+function setTextureAnisotropy(mat: MeshStandardMaterial, maxAniso: number) {
+  for (const slot of STANDARD_TEXTURE_SLOTS) {
+    const tex = mat[slot];
+    if (tex instanceof Texture) {
+      tex.anisotropy = maxAniso;
+      tex.needsUpdate = true;
+    }
+  }
+  if (mat instanceof MeshPhysicalMaterial) {
+    const coatN = mat.clearcoatNormalMap;
+    if (coatN instanceof Texture) {
+      coatN.anisotropy = maxAniso;
+      coatN.needsUpdate = true;
+    }
+  }
+}
+
+function applyMaxAnisotropy(root: Object3D, maxAniso: number) {
+  root.traverse((obj) => {
+    if (!(obj instanceof Mesh)) {
+      return;
+    }
+    const mats = Array.isArray(obj.material) ? obj.material : [obj.material];
+    for (const mat of mats) {
+      if (mat instanceof MeshStandardMaterial) {
+        setTextureAnisotropy(mat, maxAniso);
+      }
+    }
+  });
+}
+
+function collectMeshMaterials(
+  root: Mesh,
+): (MeshStandardMaterial | MeshPhysicalMaterial)[] {
   const out: (MeshStandardMaterial | MeshPhysicalMaterial)[] = [];
   const m = root.material;
   const list = Array.isArray(m) ? m : [m];
   for (const mat of list) {
-    if (mat instanceof MeshStandardMaterial || mat instanceof MeshPhysicalMaterial) {
+    if (
+      mat instanceof MeshStandardMaterial ||
+      mat instanceof MeshPhysicalMaterial
+    ) {
       out.push(mat);
     }
   }
   return out;
 }
 
-function preservePbrOnMaterial(mat: MeshStandardMaterial | MeshPhysicalMaterial) {
+function preservePbrOnMaterial(
+  mat: MeshStandardMaterial | MeshPhysicalMaterial,
+) {
   const hasAlbedoTexture = Boolean(mat.map);
   const hasVertexColors = Boolean(mat.vertexColors);
   const envMapIntensity =
@@ -148,7 +212,8 @@ function preservePbrOnMaterial(mat: MeshStandardMaterial | MeshPhysicalMaterial)
     envMapIntensity,
     hasAlbedoTexture,
     hasVertexColors,
-    physicalTransmission: mat instanceof MeshPhysicalMaterial ? mat.transmission : 0,
+    physicalTransmission:
+      mat instanceof MeshPhysicalMaterial ? mat.transmission : 0,
     physicalClearcoat: mat instanceof MeshPhysicalMaterial ? mat.clearcoat : 0,
     physicalClearcoatRoughness:
       mat instanceof MeshPhysicalMaterial ? mat.clearcoatRoughness : 0,
@@ -168,7 +233,7 @@ function tintedBaseColor(preset: MaterialPresetConfig) {
 function applyPresetToMaterial(
   mat: MeshStandardMaterial | MeshPhysicalMaterial,
   preset: MaterialPresetConfig,
-  presetKey: MaterialPreset
+  presetKey: MaterialPreset,
 ) {
   const p = mat.userData.__pbr as PreservedPbr | undefined;
   if (!p) {
@@ -177,31 +242,23 @@ function applyPresetToMaterial(
 
   if (shouldPreserveBaseColor(p)) {
     mat.color.copy(tintedBaseColor(preset));
-    if (presetKey === "neon") {
-      mat.emissive.set(preset.accentLight);
-      mat.emissiveIntensity = Math.min(0.14, preset.emissiveIntensity * 0.35);
-    } else {
-      mat.emissive.setRGB(0, 0, 0);
-      mat.emissiveIntensity = 0;
-    }
-    mat.roughness = MathUtils.lerp(p.roughness, preset.roughness, 0.22);
-    mat.metalness = MathUtils.lerp(p.metalness, preset.metalness, 0.22);
+    // Photogrammetry: never add emissive tint — it reads as plastic/neon on skin; rim light is enough.
+    mat.emissive.setRGB(0, 0, 0);
+    mat.emissiveIntensity = 0;
+    mat.metalness = SCAN_METALNESS;
+    mat.roughness = MathUtils.clamp(
+      Math.max(p.roughness, SCAN_ROUGHNESS_FLOOR),
+      0,
+      1,
+    );
     if ("envMapIntensity" in mat && typeof mat.envMapIntensity === "number") {
-      mat.envMapIntensity = MathUtils.lerp(
-        p.envMapIntensity,
-        preset.envMapIntensity,
-        0.35
-      );
+      mat.envMapIntensity = SCAN_ENV_MAP_INTENSITY;
     }
     if (mat instanceof MeshPhysicalMaterial) {
-      mat.transmission = MathUtils.lerp(p.physicalTransmission, preset.transmission, 0.35);
+      mat.transmission = 0;
       mat.thickness = preset.thickness;
-      mat.clearcoat = MathUtils.lerp(p.physicalClearcoat, preset.clearcoat, 0.25);
-      mat.clearcoatRoughness = MathUtils.lerp(
-        p.physicalClearcoatRoughness,
-        preset.clearcoatRoughness,
-        0.25
-      );
+      mat.clearcoat = 0;
+      mat.clearcoatRoughness = preset.clearcoatRoughness;
     }
     return;
   }
@@ -232,7 +289,7 @@ function killMaterialTweens(mat: MeshStandardMaterial | MeshPhysicalMaterial) {
 function tweenMaterialToPreset(
   mat: MeshStandardMaterial | MeshPhysicalMaterial,
   preset: MaterialPresetConfig,
-  presetKey: MaterialPreset
+  presetKey: MaterialPreset,
 ) {
   const p = mat.userData.__pbr as PreservedPbr | undefined;
   if (!p) {
@@ -245,11 +302,7 @@ function tweenMaterialToPreset(
   if (shouldPreserveBaseColor(p)) {
     const targetColor = tintedBaseColor(preset);
     const targetEmissive = new Color(0, 0, 0);
-    let targetEmissiveIntensity = 0;
-    if (presetKey === "neon") {
-      targetEmissive.set(preset.accentLight);
-      targetEmissiveIntensity = Math.min(0.14, preset.emissiveIntensity * 0.35);
-    }
+    const targetEmissiveIntensity = 0;
 
     gsap.to(mat.color, {
       r: targetColor.r,
@@ -267,21 +320,22 @@ function tweenMaterialToPreset(
       ease,
       overwrite: "auto",
     });
+    const scanRoughness = MathUtils.clamp(
+      Math.max(p.roughness, SCAN_ROUGHNESS_FLOOR),
+      0,
+      1,
+    );
     gsap.to(mat, {
       emissiveIntensity: targetEmissiveIntensity,
-      roughness: MathUtils.lerp(p.roughness, preset.roughness, 0.22),
-      metalness: MathUtils.lerp(p.metalness, preset.metalness, 0.22),
+      roughness: scanRoughness,
+      metalness: SCAN_METALNESS,
       duration,
       ease,
       overwrite: "auto",
     });
     if ("envMapIntensity" in mat && typeof mat.envMapIntensity === "number") {
       gsap.to(mat, {
-        envMapIntensity: MathUtils.lerp(
-          p.envMapIntensity,
-          preset.envMapIntensity,
-          0.35
-        ),
+        envMapIntensity: SCAN_ENV_MAP_INTENSITY,
         duration,
         ease,
         overwrite: "auto",
@@ -289,14 +343,10 @@ function tweenMaterialToPreset(
     }
     if (mat instanceof MeshPhysicalMaterial) {
       gsap.to(mat, {
-        transmission: MathUtils.lerp(p.physicalTransmission, preset.transmission, 0.35),
+        transmission: 0,
         thickness: preset.thickness,
-        clearcoat: MathUtils.lerp(p.physicalClearcoat, preset.clearcoat, 0.25),
-        clearcoatRoughness: MathUtils.lerp(
-          p.physicalClearcoatRoughness,
-          preset.clearcoatRoughness,
-          0.25
-        ),
+        clearcoat: 0,
+        clearcoatRoughness: preset.clearcoatRoughness,
         duration,
         ease,
         overwrite: "auto",
@@ -344,9 +394,12 @@ function tweenMaterialToPreset(
 }
 
 export default function SceneObjectManager() {
-  const { activeSection } = useSceneState();
+  const { scrollAlongRef } = useSceneState();
   const { scene } = useGLTF(HERO_SCENE_MODEL_GLB);
-  const [viewportScaleBoost, setViewportScaleBoost] = useState(VIEWPORT_SCALE_MOBILE);
+  const { gl } = useThree();
+  const [viewportScaleBoost, setViewportScaleBoost] = useState(
+    VIEWPORT_SCALE_MOBILE,
+  );
 
   useEffect(() => {
     const mqNarrow = window.matchMedia("(max-width: 767px)");
@@ -369,17 +422,30 @@ export default function SceneObjectManager() {
     };
   }, []);
 
-  /** Section pose: position, scale, rotation from GSAP (no continuous spin). */
+  /** Section pose: position, scale, rotation from GSAP only (no per-frame position fight). */
   const poseGroupRef = useRef<Group>(null);
+  /** Narrow-viewport hero scroll fade: opacity + playful motion (does not fight GSAP pose). */
+  const mobileHeroFadeRef = useRef<Group>(null);
+  /** Subtle scroll-section drift; kept separate so GSAP can own `poseGroupRef` transforms. */
+  const driftGroupRef = useRef<Group>(null);
   /** Turntable: only `rotation.y` is updated each frame — avoids Euler “tumbling”. */
   const spinGroupRef = useRef<Group>(null);
   const rimLightRef = useRef<PointLight>(null);
-  const materialsRef = useRef<(MeshStandardMaterial | MeshPhysicalMaterial)[]>([]);
+  const materialsRef = useRef<(MeshStandardMaterial | MeshPhysicalMaterial)[]>(
+    [],
+  );
   const enteredRef = useRef(false);
-  const spinSpeedRef = useRef(0.2);
+  const introCompleteRef = useRef(false);
+  const lastMaterialSlugRef = useRef<SectionSlug | null>(null);
   const initializedRef = useRef(false);
-  const anchorRef = useRef(sectionAnchors[activeSection]);
   const frameClockRef = useRef(0);
+  const rotScratchRef = useRef({
+    e1: new Euler(),
+    e2: new Euler(),
+    q1: new Quaternion(),
+    q2: new Quaternion(),
+    qm: new Quaternion(),
+  });
 
   const model = useMemo(() => {
     const clone = scene.clone(true);
@@ -399,10 +465,18 @@ export default function SceneObjectManager() {
     return clone;
   }, [scene]);
 
+  useLayoutEffect(() => {
+    const maxAniso = Math.min(16, gl.capabilities.getMaxAnisotropy());
+    applyMaxAnisotropy(model, maxAniso);
+  }, [model, gl]);
+
   const clamp = (value: number, min: number, max: number) =>
     Math.min(max, Math.max(min, value));
 
   useEffect(() => {
+    if (enteredRef.current) {
+      return;
+    }
     const pose = poseGroupRef.current;
     const rim = rimLightRef.current;
     const materials = materialsRef.current;
@@ -410,8 +484,8 @@ export default function SceneObjectManager() {
       return;
     }
 
-    const anchor = sectionAnchors[activeSection];
-    anchorRef.current = anchor;
+    enteredRef.current = true;
+    const anchor = sectionAnchors.hero;
     const preset = materialPresets[anchor.materialPreset];
     const presetKey = anchor.materialPreset;
     const safePosition = {
@@ -429,21 +503,26 @@ export default function SceneObjectManager() {
       y: baseScale.y * viewportScaleBoost,
       z: baseScale.z * viewportScaleBoost,
     };
-    spinSpeedRef.current = preset.spinSpeed;
 
     const accent = new Color(preset.accentLight);
 
-    if (!enteredRef.current) {
-      enteredRef.current = true;
-      pose.visible = false;
-      materials.forEach((mat) => applyPresetToMaterial(mat, preset, presetKey));
-      rim.color.copy(accent);
-      rim.intensity = preset.rimIntensity;
-      pose.position.set(safePosition.x, safePosition.y, safePosition.z);
-      pose.scale.set(safeScale.x, safeScale.y, safeScale.z);
-      pose.visible = true;
-      initializedRef.current = true;
-      gsap.fromTo(
+    pose.visible = false;
+    materials.forEach((mat) => applyPresetToMaterial(mat, preset, presetKey));
+    rim.color.copy(accent);
+    rim.intensity = preset.rimIntensity;
+    pose.position.set(safePosition.x, safePosition.y, safePosition.z);
+    pose.scale.set(safeScale.x, safeScale.y, safeScale.z);
+    pose.visible = true;
+    initializedRef.current = true;
+    lastMaterialSlugRef.current = "hero";
+
+    gsap
+      .timeline({
+        onComplete: () => {
+          introCompleteRef.current = true;
+        },
+      })
+      .fromTo(
         pose.scale,
         { x: 0.2, y: 0.2, z: 0.2 },
         {
@@ -452,9 +531,10 @@ export default function SceneObjectManager() {
           z: safeScale.z,
           duration: 1.6,
           ease: "expo.out",
-        }
-      );
-      gsap.fromTo(
+        },
+        0,
+      )
+      .fromTo(
         pose.rotation,
         { x: -1.2, y: -1.8, z: 0.7 },
         {
@@ -463,108 +543,213 @@ export default function SceneObjectManager() {
           z: anchor.objectTransform.rotation[2],
           duration: 1.8,
           ease: "power3.out",
-        }
+        },
+        0,
       );
-    }
-
-    gsap.killTweensOf(pose.rotation);
-    gsap.killTweensOf(pose.position);
-    gsap.killTweensOf(pose.scale);
-    materials.forEach((mat) => killMaterialTweens(mat));
-    gsap.killTweensOf(rim);
-    gsap.killTweensOf(rim.color);
-
-    gsap.to(pose.position, {
-      x: safePosition.x,
-      y: safePosition.y,
-      z: safePosition.z,
-      duration: 1.2,
-      ease: "power2.inOut",
-      overwrite: "auto",
-    });
-
-    gsap.to(pose.rotation, {
-      x: anchor.objectTransform.rotation[0],
-      y: anchor.objectTransform.rotation[1],
-      z: anchor.objectTransform.rotation[2],
-      duration: 1.6,
-      ease: "power3.inOut",
-      overwrite: "auto",
-    });
-    gsap.to(pose.scale, {
-      x: safeScale.x,
-      y: safeScale.y,
-      z: safeScale.z,
-      duration: 1.2,
-      ease: "power3.out",
-      overwrite: "auto",
-    });
-
-    materials.forEach((mat) => tweenMaterialToPreset(mat, preset, presetKey));
-
-    gsap.to(rim.color, {
-      r: accent.r,
-      g: accent.g,
-      b: accent.b,
-      duration: 1.1,
-      ease: "power2.out",
-      overwrite: "auto",
-    });
-    gsap.to(rim, {
-      intensity: preset.rimIntensity,
-      duration: 1.05,
-      ease: "power2.out",
-      overwrite: "auto",
-    });
-  }, [activeSection, model, viewportScaleBoost]);
+  }, [model, viewportScaleBoost]);
 
   useFrame((_state, delta) => {
     frameClockRef.current += delta;
     const pose = poseGroupRef.current;
+    const mobileFadeWrap = mobileHeroFadeRef.current;
+    const driftWrap = driftGroupRef.current;
     const spin = spinGroupRef.current;
-    if (!pose || !spin || !initializedRef.current) {
+    const rim = rimLightRef.current;
+    const materials = materialsRef.current;
+    if (
+      !pose ||
+      !mobileFadeWrap ||
+      !driftWrap ||
+      !spin ||
+      !initializedRef.current
+    ) {
       return;
     }
 
-    const anchor = anchorRef.current;
-    const microMotion = anchor.microMotion ?? {
+    const isNarrowViewport = viewportScaleBoost === VIEWPORT_SCALE_MOBILE;
+
+    const along = scrollAlongRef.current;
+    const lastIdx = SECTION_ORDER.length - 1;
+    const i = Math.floor(MathUtils.clamp(along, 0, lastIdx));
+    const j = Math.min(i + 1, lastIdx);
+    const t = along - i;
+    const slugA = SECTION_ORDER[i];
+    const slugB = SECTION_ORDER[j];
+    const anchorA = sectionAnchors[slugA];
+    const anchorB = sectionAnchors[slugB];
+    const presetA = materialPresets[anchorA.materialPreset];
+    const presetB = materialPresets[anchorB.materialPreset];
+
+    const applyMobileHeroScrollFade = () => {
+      if (!isNarrowViewport) {
+        mobileFadeWrap.visible = true;
+        mobileFadeWrap.position.set(0, 0, 0);
+        mobileFadeWrap.scale.set(1, 1, 1);
+        mobileFadeWrap.rotation.set(0, 0, 0);
+        for (const mat of materials) {
+          mat.opacity = 1;
+          mat.transparent = false;
+          mat.depthWrite = true;
+        }
+        return;
+      }
+
+      const alongClamped = clamp(along, 0, 1);
+      const fadeProgress = Math.pow(alongClamped, MOBILE_HERO_FADE_POWER);
+      const opacity = clamp(1 - fadeProgress, 0, 1);
+      const wobbleT = alongClamped * Math.PI * 2.5;
+      const wobble =
+        Math.sin(wobbleT) * MOBILE_HERO_FADE_WOBBLE * alongClamped;
+      const lift = MOBILE_HERO_FADE_LIFT * Math.pow(alongClamped, 1.65);
+      const scaleUniform = clamp(
+        1 - MOBILE_HERO_FADE_SCALE_DROP * Math.pow(alongClamped, 1.35),
+        0.2,
+        1,
+      );
+
+      mobileFadeWrap.visible = opacity > 0.008;
+      mobileFadeWrap.position.set(0, lift, 0);
+      mobileFadeWrap.scale.set(scaleUniform, scaleUniform, scaleUniform);
+      mobileFadeWrap.rotation.set(0, 0, wobble);
+
+      const transparent = opacity < 0.995;
+      for (const mat of materials) {
+        mat.opacity = opacity;
+        mat.transparent = transparent;
+        mat.depthWrite = !transparent;
+      }
+
+      if (rim) {
+        const rimBase = MathUtils.lerp(presetA.rimIntensity, presetB.rimIntensity, t);
+        rim.intensity = rimBase * opacity;
+      }
+    };
+
+    const defaultMicro = {
       orbitBoost: 0.2,
       wirePulse: 0.016,
       driftStrength: 0.012,
     };
 
-    const driftX = Math.sin(frameClockRef.current * 0.35) * microMotion.driftStrength;
-    const driftY = Math.cos(frameClockRef.current * 0.45) * microMotion.driftStrength;
+    const microA = anchorA.microMotion ?? defaultMicro;
+    const microB = anchorB.microMotion ?? defaultMicro;
+    const driftStrength = MathUtils.lerp(
+      microA.driftStrength,
+      microB.driftStrength,
+      t,
+    );
+    const orbitBoost = MathUtils.lerp(microA.orbitBoost, microB.orbitBoost, t);
+    const spinSpeed = MathUtils.lerp(presetA.spinSpeed, presetB.spinSpeed, t);
 
-    const targetX = anchor.objectTransform.position[0] + driftX;
-    const targetY = anchor.objectTransform.position[1] + driftY;
-    const targetZ = anchor.objectTransform.position[2];
+    const driftX =
+      Math.sin(frameClockRef.current * 0.35) * driftStrength;
+    const driftY =
+      Math.cos(frameClockRef.current * 0.45) * driftStrength;
 
-    // Turntable: local Y only on the inner group (no X/Z — avoids head-over-feet tumbling).
+    driftWrap.position.set(driftX, driftY, 0);
+
     spin.rotation.y +=
       delta *
-      spinSpeedRef.current *
-      microMotion.orbitBoost *
-      TURNTABLE_SPEED_MULTIPLIER;
+      spinSpeed *
+      orbitBoost *
+      TURNTABLE_SPEED_MULTIPLIER *
+      (isNarrowViewport
+        ? 1 + clamp(along, 0, 1) * MOBILE_HERO_FADE_SPIN_BOOST
+        : 1);
 
-    pose.position.x += (targetX - pose.position.x) * 0.06;
-    pose.position.y += (targetY - pose.position.y) * 0.06;
-    pose.position.z += (targetZ - pose.position.z) * 0.06;
+    if (!introCompleteRef.current) {
+      applyMobileHeroScrollFade();
+      return;
+    }
+
+    const posA = anchorA.objectTransform.position;
+    const posB = anchorB.objectTransform.position;
+    const rotA = anchorA.objectTransform.rotation;
+    const rotB = anchorB.objectTransform.rotation;
+    const scA = anchorA.objectTransform.scale;
+    const scB = anchorB.objectTransform.scale;
+
+    pose.position.set(
+      clamp(MathUtils.lerp(posA[0], posB[0], t), -1.05, 1.05),
+      clamp(MathUtils.lerp(posA[1], posB[1], t), -0.4, 0.4),
+      clamp(MathUtils.lerp(posA[2], posB[2], t), -0.65, 0.1),
+    );
+
+    const { e1, e2, q1, q2, qm } = rotScratchRef.current;
+    e1.set(rotA[0], rotA[1], rotA[2], "XYZ");
+    e2.set(rotB[0], rotB[1], rotB[2], "XYZ");
+    q1.setFromEuler(e1);
+    q2.setFromEuler(e2);
+    qm.copy(q1).slerp(q2, t);
+    pose.rotation.setFromQuaternion(qm, "XYZ");
+
+    const sx =
+      clamp(MathUtils.lerp(scA[0], scB[0], t), 1, 1.35) * viewportScaleBoost;
+    const sy =
+      clamp(MathUtils.lerp(scA[1], scB[1], t), 1, 1.35) * viewportScaleBoost;
+    const sz =
+      clamp(MathUtils.lerp(scA[2], scB[2], t), 1, 1.35) * viewportScaleBoost;
+    pose.scale.set(sx, sy, sz);
+
+    if (materials.length === 0) {
+      applyMobileHeroScrollFade();
+      return;
+    }
+
+    const materialSlug =
+      SECTION_ORDER[Math.round(MathUtils.clamp(along, 0, lastIdx))];
+    if (materialSlug !== lastMaterialSlugRef.current) {
+      lastMaterialSlugRef.current = materialSlug;
+      const anchorM = sectionAnchors[materialSlug];
+      const presetM = materialPresets[anchorM.materialPreset];
+      const presetKeyM = anchorM.materialPreset;
+      const accentM = new Color(presetM.accentLight);
+
+      materials.forEach((mat) => killMaterialTweens(mat));
+
+      materials.forEach((mat) =>
+        tweenMaterialToPreset(mat, presetM, presetKeyM),
+      );
+      if (rim) {
+        gsap.killTweensOf(rim);
+        gsap.killTweensOf(rim.color);
+        gsap.to(rim.color, {
+          r: accentM.r,
+          g: accentM.g,
+          b: accentM.b,
+          duration: 1.1,
+          ease: "power2.out",
+          overwrite: "auto",
+        });
+        gsap.to(rim, {
+          intensity: presetM.rimIntensity,
+          duration: 1.05,
+          ease: "power2.out",
+          overwrite: "auto",
+        });
+      }
+    }
+
+    applyMobileHeroScrollFade();
   });
 
   return (
     <group ref={poseGroupRef}>
-      <pointLight
-        ref={rimLightRef}
-        position={[0.55, 0.4, 1.85]}
-        intensity={0.52}
-        distance={9}
-        decay={2}
-      />
-      <group ref={spinGroupRef} rotation={[0, MODEL_FORWARD_YAW_OFFSET, 0]}>
-        <Center>
-          <primitive object={model} />
-        </Center>
+      <group ref={mobileHeroFadeRef}>
+        <group ref={driftGroupRef}>
+          <pointLight
+            ref={rimLightRef}
+            position={[0.55, 0.4, 1.85]}
+            intensity={0.52}
+            distance={9}
+            decay={2}
+          />
+          <group ref={spinGroupRef} rotation={[0, MODEL_FORWARD_YAW_OFFSET, 0]}>
+            <Center>
+              <primitive object={model} />
+            </Center>
+          </group>
+        </group>
       </group>
     </group>
   );

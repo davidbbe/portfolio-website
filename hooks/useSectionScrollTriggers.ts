@@ -85,8 +85,6 @@ export function useSectionScrollTriggers({
             start: SCROLL_TRIGGER_DEFAULTS.start,
             end: SCROLL_TRIGGER_DEFAULTS.end,
             scrub: variant === "hero" || isMobileViewport ? false : 0.35,
-            onEnter: () => setActiveSection(sectionSlug),
-            onEnterBack: () => setActiveSection(sectionSlug),
           },
         });
 
