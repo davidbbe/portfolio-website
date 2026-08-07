@@ -114,6 +114,14 @@ export type ProjectItem = {
 
 export const projectsData: readonly ProjectItem[] = [
   {
+    title: "Greeting Card Fun",
+    url: "https://www.greetingcardfun.com",
+    description: "I designed and developed this application. It turns a favorite photo into a funny personalized e-card with AI image generation. Users pick a template, upload a face, customize the message, then download or share by link, email, text, or WhatsApp. It includes user accounts, credit-based pricing with Stripe, scheduled sending, and a community gallery of shared cards.",
+    image: "/images/portfolio/Greeting-Card-Fun.jpg",
+    featuredTags: ["Next.js", "Gemini API", "Stripe", "GSAP"],
+    tags: ["Next.js", "React", "TypeScript", "Tailwind", "Prisma", "PostgreSQL", "Neon Database", "Stripe", "GSAP", "Vercel", "Better Auth", "Gemini API"],
+  },
+  {
     title: "Underwater Hockey Map",
     url: "https://uwhmap.com",
     description: "I designed and developed this application. It uses the Google Maps API and Google Places API to view, create, or edit underwater hockey clubs around the world. It has features like login, user accounts, and CRUD functionality for users to dynamically manage the database and pages.",
