@@ -2,15 +2,21 @@
 
 import { useSceneState } from "@/context/scene-state-context";
 import { sectionAnchors } from "@/lib/scene/sectionAnchors";
-import { HERO_SCENE_MODEL_GLB, SECTION_ORDER } from "@/lib/scene/sceneConfig";
+import {
+  HERO_SCENE_MODEL_GLB,
+  SCENE_DAMPING,
+  SCENE_MOTION,
+  SECTION_ORDER,
+} from "@/lib/scene/sceneConfig";
+import { sectionBlend } from "@/lib/scene/scrollAlong";
 import type { MaterialPreset, SectionSlug } from "@/lib/scene/types";
-import { Center, useGLTF } from "@react-three/drei";
+import { ContactShadows, useGLTF } from "@react-three/drei";
 import { useFrame, useThree } from "@react-three/fiber";
 import gsap from "gsap";
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import {
+  Box3,
   Color,
-  Euler,
   Group,
   MathUtils,
   Mesh,
@@ -18,8 +24,8 @@ import {
   MeshStandardMaterial,
   Object3D,
   PointLight,
-  Quaternion,
   Texture,
+  Vector3,
 } from "three";
 
 /** How strongly section presets tint textured albedo (multiply with baseColor map). */
@@ -28,25 +34,23 @@ const TEXTURE_TINT_STRENGTH = 0.14;
 /** Yaw on the turntable group so a typical -Z-forward glTF bust faces the camera at +Z. */
 const MODEL_FORWARD_YAW_OFFSET = Math.PI;
 
-/** Scales turntable speed (rad/s) after preset `spinSpeed` × `microMotion.orbitBoost`. */
-const TURNTABLE_SPEED_MULTIPLIER = 5.5;
-
 /** Extra uniform scale on tablet/desktop (multiplies section `safeScale`; mobile stays 1). */
 const VIEWPORT_SCALE_MOBILE = 1;
 const VIEWPORT_SCALE_TABLET = 1.2;
 const VIEWPORT_SCALE_DESKTOP = 1.4;
 
+const INTRO_SCALE_FROM = 0.88;
+const INTRO_DURATION = 1.35;
+
 /** Hero → About: bust fades out on narrow viewports by `scrollAlong` index 1. */
-const MOBILE_HERO_FADE_POWER = 2.05;
-const MOBILE_HERO_FADE_SCALE_DROP = 0.22;
-const MOBILE_HERO_FADE_LIFT = 0.2;
-const MOBILE_HERO_FADE_WOBBLE = 0.14;
-const MOBILE_HERO_FADE_SPIN_BOOST = 4.2;
+const MOBILE_HERO_FADE_POWER = 1.65;
+const MOBILE_HERO_FADE_SCALE_DROP = 0.18;
+const MOBILE_HERO_FADE_LIFT = 0.1;
 
 /** Photogrammetry / textured scan: diffuse look, no metallic sheen or clearcoat. */
 const SCAN_METALNESS = 0;
-const SCAN_ROUGHNESS_FLOOR = 0.72;
-const SCAN_ENV_MAP_INTENSITY = 0.22;
+const SCAN_ROUGHNESS_FLOOR = 0.68;
+const SCAN_ENV_MAP_INTENSITY = 0.36;
 
 type MaterialPresetConfig = {
   color: string;
@@ -422,30 +426,26 @@ export default function SceneObjectManager() {
     };
   }, []);
 
-  /** Section pose: position, scale, rotation from GSAP only (no per-frame position fight). */
+  /** Section pose: damped position / pitch / scale from scroll anchors. */
   const poseGroupRef = useRef<Group>(null);
-  /** Narrow-viewport hero scroll fade: opacity + playful motion (does not fight GSAP pose). */
+  /** Narrow-viewport hero scroll fade: opacity + lift (does not fight pose). */
   const mobileHeroFadeRef = useRef<Group>(null);
-  /** Subtle scroll-section drift; kept separate so GSAP can own `poseGroupRef` transforms. */
+  /** Subtle idle drift; kept separate so pose damping can own `poseGroupRef`. */
   const driftGroupRef = useRef<Group>(null);
-  /** Turntable: only `rotation.y` is updated each frame — avoids Euler “tumbling”. */
+  /** Turntable: only `rotation.y` — idle spin + scroll yaw in one direction. */
   const spinGroupRef = useRef<Group>(null);
   const rimLightRef = useRef<PointLight>(null);
   const materialsRef = useRef<(MeshStandardMaterial | MeshPhysicalMaterial)[]>(
     [],
   );
   const enteredRef = useRef(false);
-  const introCompleteRef = useRef(false);
   const lastMaterialSlugRef = useRef<SectionSlug | null>(null);
   const initializedRef = useRef(false);
   const frameClockRef = useRef(0);
-  const rotScratchRef = useRef({
-    e1: new Euler(),
-    e2: new Euler(),
-    q1: new Quaternion(),
-    q2: new Quaternion(),
-    qm: new Quaternion(),
-  });
+  const alongSmoothRef = useRef(0);
+  const alongReadyRef = useRef(false);
+  const idleYawRef = useRef(0);
+  const introProgressRef = useRef(0);
 
   const model = useMemo(() => {
     const clone = scene.clone(true);
@@ -462,6 +462,11 @@ export default function SceneObjectManager() {
       }
     });
     materialsRef.current = materials;
+    clone.updateMatrixWorld(true);
+    const box = new Box3().setFromObject(clone);
+    if (!box.isEmpty()) {
+      clone.position.sub(box.getCenter(new Vector3()));
+    }
     return clone;
   }, [scene]);
 
@@ -511,45 +516,26 @@ export default function SceneObjectManager() {
     rim.color.copy(accent);
     rim.intensity = preset.rimIntensity;
     pose.position.set(safePosition.x, safePosition.y, safePosition.z);
-    pose.scale.set(safeScale.x, safeScale.y, safeScale.z);
+    pose.rotation.set(anchor.objectTransform.rotation[0], 0, 0);
+    pose.scale.set(
+      safeScale.x * INTRO_SCALE_FROM,
+      safeScale.y * INTRO_SCALE_FROM,
+      safeScale.z * INTRO_SCALE_FROM,
+    );
+    const spin = spinGroupRef.current;
+    if (spin) {
+      spin.rotation.set(0, MODEL_FORWARD_YAW_OFFSET + SCENE_MOTION.baseYaw, 0);
+    }
+    gsap.killTweensOf(pose.rotation);
+    gsap.killTweensOf(pose.scale);
     pose.visible = true;
     initializedRef.current = true;
     lastMaterialSlugRef.current = "hero";
-
-    gsap
-      .timeline({
-        onComplete: () => {
-          introCompleteRef.current = true;
-        },
-      })
-      .fromTo(
-        pose.scale,
-        { x: 0.2, y: 0.2, z: 0.2 },
-        {
-          x: safeScale.x,
-          y: safeScale.y,
-          z: safeScale.z,
-          duration: 1.6,
-          ease: "expo.out",
-        },
-        0,
-      )
-      .fromTo(
-        pose.rotation,
-        { x: -1.2, y: -1.8, z: 0.7 },
-        {
-          x: anchor.objectTransform.rotation[0],
-          y: anchor.objectTransform.rotation[1],
-          z: anchor.objectTransform.rotation[2],
-          duration: 1.8,
-          ease: "power3.out",
-        },
-        0,
-      );
   }, [model, viewportScaleBoost]);
 
   useFrame((_state, delta) => {
-    frameClockRef.current += delta;
+    const dt = Math.min(delta, 0.05);
+    frameClockRef.current += dt;
     const pose = poseGroupRef.current;
     const mobileFadeWrap = mobileHeroFadeRef.current;
     const driftWrap = driftGroupRef.current;
@@ -567,12 +553,22 @@ export default function SceneObjectManager() {
     }
 
     const isNarrowViewport = viewportScaleBoost === VIEWPORT_SCALE_MOBILE;
+    const alongRaw = scrollAlongRef.current;
 
-    const along = scrollAlongRef.current;
-    const lastIdx = SECTION_ORDER.length - 1;
-    const i = Math.floor(MathUtils.clamp(along, 0, lastIdx));
-    const j = Math.min(i + 1, lastIdx);
-    const t = along - i;
+    if (!alongReadyRef.current) {
+      alongSmoothRef.current = alongRaw;
+      alongReadyRef.current = true;
+    } else {
+      alongSmoothRef.current = MathUtils.damp(
+        alongSmoothRef.current,
+        alongRaw,
+        SCENE_DAMPING.along,
+        dt,
+      );
+    }
+
+    const along = alongSmoothRef.current;
+    const { i, j, t } = sectionBlend(along, SECTION_ORDER.length);
     const slugA = SECTION_ORDER[i];
     const slugB = SECTION_ORDER[j];
     const anchorA = sectionAnchors[slugA];
@@ -597,9 +593,6 @@ export default function SceneObjectManager() {
       const alongClamped = clamp(along, 0, 1);
       const fadeProgress = Math.pow(alongClamped, MOBILE_HERO_FADE_POWER);
       const opacity = clamp(1 - fadeProgress, 0, 1);
-      const wobbleT = alongClamped * Math.PI * 2.5;
-      const wobble =
-        Math.sin(wobbleT) * MOBILE_HERO_FADE_WOBBLE * alongClamped;
       const lift = MOBILE_HERO_FADE_LIFT * Math.pow(alongClamped, 1.65);
       const scaleUniform = clamp(
         1 - MOBILE_HERO_FADE_SCALE_DROP * Math.pow(alongClamped, 1.35),
@@ -610,7 +603,7 @@ export default function SceneObjectManager() {
       mobileFadeWrap.visible = opacity > 0.008;
       mobileFadeWrap.position.set(0, lift, 0);
       mobileFadeWrap.scale.set(scaleUniform, scaleUniform, scaleUniform);
-      mobileFadeWrap.rotation.set(0, 0, wobble);
+      mobileFadeWrap.rotation.set(0, 0, 0);
 
       const transparent = opacity < 0.995;
       for (const mat of materials) {
@@ -620,7 +613,11 @@ export default function SceneObjectManager() {
       }
 
       if (rim) {
-        const rimBase = MathUtils.lerp(presetA.rimIntensity, presetB.rimIntensity, t);
+        const rimBase = MathUtils.lerp(
+          presetA.rimIntensity,
+          presetB.rimIntensity,
+          t,
+        );
         rim.intensity = rimBase * opacity;
       }
     };
@@ -638,29 +635,22 @@ export default function SceneObjectManager() {
       microB.driftStrength,
       t,
     );
-    const orbitBoost = MathUtils.lerp(microA.orbitBoost, microB.orbitBoost, t);
-    const spinSpeed = MathUtils.lerp(presetA.spinSpeed, presetB.spinSpeed, t);
 
-    const driftX =
-      Math.sin(frameClockRef.current * 0.35) * driftStrength;
-    const driftY =
-      Math.cos(frameClockRef.current * 0.45) * driftStrength;
+    driftWrap.position.set(
+      Math.sin(frameClockRef.current * 0.32) * driftStrength,
+      Math.cos(frameClockRef.current * 0.4) * driftStrength,
+      0,
+    );
 
-    driftWrap.position.set(driftX, driftY, 0);
-
-    spin.rotation.y +=
-      delta *
-      spinSpeed *
-      orbitBoost *
-      TURNTABLE_SPEED_MULTIPLIER *
-      (isNarrowViewport
-        ? 1 + clamp(along, 0, 1) * MOBILE_HERO_FADE_SPIN_BOOST
-        : 1);
-
-    if (!introCompleteRef.current) {
-      applyMobileHeroScrollFade();
-      return;
-    }
+    idleYawRef.current += dt * SCENE_MOTION.idleSpin;
+    spin.rotation.set(
+      0,
+      MODEL_FORWARD_YAW_OFFSET +
+        SCENE_MOTION.baseYaw +
+        idleYawRef.current +
+        along * SCENE_MOTION.scrollYawPerSection,
+      0,
+    );
 
     const posA = anchorA.objectTransform.position;
     const posB = anchorB.objectTransform.position;
@@ -674,22 +664,28 @@ export default function SceneObjectManager() {
       clamp(MathUtils.lerp(posA[1], posB[1], t), -0.4, 0.4),
       clamp(MathUtils.lerp(posA[2], posB[2], t), -0.65, 0.1),
     );
+    pose.rotation.set(MathUtils.lerp(rotA[0], rotB[0], t), 0, 0);
 
-    const { e1, e2, q1, q2, qm } = rotScratchRef.current;
-    e1.set(rotA[0], rotA[1], rotA[2], "XYZ");
-    e2.set(rotB[0], rotB[1], rotB[2], "XYZ");
-    q1.setFromEuler(e1);
-    q2.setFromEuler(e2);
-    qm.copy(q1).slerp(q2, t);
-    pose.rotation.setFromQuaternion(qm, "XYZ");
-
-    const sx =
-      clamp(MathUtils.lerp(scA[0], scB[0], t), 1, 1.35) * viewportScaleBoost;
-    const sy =
-      clamp(MathUtils.lerp(scA[1], scB[1], t), 1, 1.35) * viewportScaleBoost;
-    const sz =
-      clamp(MathUtils.lerp(scA[2], scB[2], t), 1, 1.35) * viewportScaleBoost;
-    pose.scale.set(sx, sy, sz);
+    introProgressRef.current = Math.min(
+      1,
+      introProgressRef.current + dt / INTRO_DURATION,
+    );
+    const introMul = MathUtils.lerp(
+      INTRO_SCALE_FROM,
+      1,
+      1 - Math.pow(1 - introProgressRef.current, 4),
+    );
+    pose.scale.set(
+      clamp(MathUtils.lerp(scA[0], scB[0], t), 1, 1.35) *
+        viewportScaleBoost *
+        introMul,
+      clamp(MathUtils.lerp(scA[1], scB[1], t), 1, 1.35) *
+        viewportScaleBoost *
+        introMul,
+      clamp(MathUtils.lerp(scA[2], scB[2], t), 1, 1.35) *
+        viewportScaleBoost *
+        introMul,
+    );
 
     if (materials.length === 0) {
       applyMobileHeroScrollFade();
@@ -697,7 +693,7 @@ export default function SceneObjectManager() {
     }
 
     const materialSlug =
-      SECTION_ORDER[Math.round(MathUtils.clamp(along, 0, lastIdx))];
+      SECTION_ORDER[Math.round(MathUtils.clamp(along, 0, SECTION_ORDER.length - 1))];
     if (materialSlug !== lastMaterialSlugRef.current) {
       lastMaterialSlugRef.current = materialSlug;
       const anchorM = sectionAnchors[materialSlug];
@@ -744,11 +740,20 @@ export default function SceneObjectManager() {
             distance={9}
             decay={2}
           />
-          <group ref={spinGroupRef} rotation={[0, MODEL_FORWARD_YAW_OFFSET, 0]}>
-            <Center>
-              <primitive object={model} />
-            </Center>
+          <group
+            ref={spinGroupRef}
+            rotation={[0, MODEL_FORWARD_YAW_OFFSET + SCENE_MOTION.baseYaw, 0]}
+          >
+            <primitive object={model} />
           </group>
+          <ContactShadows
+            position={[0, -1.08, 0]}
+            opacity={0.28}
+            scale={5.5}
+            blur={2.8}
+            far={1.8}
+            color="#071018"
+          />
         </group>
       </group>
     </group>

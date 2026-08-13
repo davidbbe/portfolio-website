@@ -3,9 +3,36 @@
 import { Environment } from "@react-three/drei";
 import { Canvas } from "@react-three/fiber";
 import { Suspense, useEffect, useState } from "react";
+import { ACESFilmicToneMapping, PCFSoftShadowMap } from "three";
 import SceneObjectManager from "./SceneObjectManager";
 import SceneRig from "./SceneRig";
 import PostFX from "./effects/PostFX";
+
+function SceneLights() {
+  return (
+    <>
+      <ambientLight intensity={0.3} />
+      <hemisphereLight
+        args={["#d7e4ff", "#1c2438", 0.52]}
+        position={[0, 2.5, 0]}
+      />
+      <directionalLight
+        position={[2.8, 3.4, 3.6]}
+        intensity={1.55}
+        color="#fff6ee"
+        castShadow
+        shadow-mapSize={[1024, 1024]}
+        shadow-bias={-0.00015}
+      />
+      <directionalLight
+        position={[-2.4, 1.2, 2.2]}
+        intensity={0.36}
+        color="#8fb0ff"
+      />
+      <pointLight position={[-1.6, 0.6, 3.2]} intensity={0.4} color="#7ba6ff" />
+    </>
+  );
+}
 
 export default function GlobalSceneCanvas() {
   const [isEnabled, setIsEnabled] = useState(false);
@@ -40,24 +67,21 @@ export default function GlobalSceneCanvas() {
       className="canvas-shell canvas-shell--front"
     >
       <Canvas
-        shadows
+        shadows="soft"
         dpr={isNarrowViewport ? [1, 1.35] : [1, 2]}
         gl={{ alpha: true, antialias: true }}
         onCreated={({ gl }) => {
           gl.setClearColor("#000000", 0);
+          gl.toneMapping = ACESFilmicToneMapping;
+          gl.toneMappingExposure = 1.08;
+          gl.shadowMap.type = PCFSoftShadowMap;
         }}
-        camera={{ position: [0, 0, 5.2], fov: 48, near: 0.1, far: 100 }}
+        camera={{ position: [0, 0.02, 5.22], fov: 48, near: 0.1, far: 100 }}
       >
-        <ambientLight intensity={0.45} />
-        <directionalLight position={[3, 3, 4]} intensity={1.4} castShadow />
-        <pointLight position={[-2, 1, 3]} intensity={0.7} color="#7ba6ff" />
-        <hemisphereLight
-          args={["#a5c8ff", "#21304e", 0.7]}
-          position={[0, 2.5, 0]}
-        />
+        <SceneLights />
         <SceneRig />
         <Suspense fallback={null}>
-          <Environment preset="city" environmentIntensity={0.28} />
+          <Environment preset="studio" environmentIntensity={0.42} />
           <SceneObjectManager />
         </Suspense>
         <PostFX />

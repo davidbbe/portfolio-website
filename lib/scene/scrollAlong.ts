@@ -1,5 +1,14 @@
 import { SECTION_ORDER } from "@/lib/scene/sceneConfig";
 
+/** Blend weights for interpolating between two section anchors. */
+export function sectionBlend(along: number, sectionCount: number) {
+  const lastIdx = Math.max(0, sectionCount - 1);
+  const clamped = Math.min(lastIdx, Math.max(0, along));
+  const i = Math.min(lastIdx, Math.floor(clamped));
+  const j = Math.min(i + 1, lastIdx);
+  return { i, j, t: clamped - i, along: clamped };
+}
+
 /** Float index in [0, SECTION_ORDER.length - 1]: whole numbers land on section centers; fractional = blend toward the next section. */
 export function scrollAlongForLerp(
   viewportCenterY: number,

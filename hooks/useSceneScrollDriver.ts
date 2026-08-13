@@ -8,6 +8,7 @@ import {
   scrollAlongForLerp,
 } from "@/lib/scene/scrollAlong";
 import type { SectionSlug } from "@/lib/scene/types";
+import { getLenis } from "@/hooks/useSmoothScroll";
 import { useEffect, useRef } from "react";
 
 type Params = {
@@ -43,7 +44,9 @@ export function useSceneScrollDriver({
         return;
       }
 
-      const scrollY = window.scrollY;
+      const lenis = getLenis();
+      const scrollY =
+        typeof lenis?.scroll === "number" ? lenis.scroll : window.scrollY;
       const viewportCenterY = scrollY + window.innerHeight * 0.5;
       const centers = elems.map((el) => {
         const r = el.getBoundingClientRect();
