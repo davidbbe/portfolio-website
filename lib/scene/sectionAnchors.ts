@@ -7,7 +7,7 @@ import { SCENE_LATERAL } from "./sceneConfig";
  * Yaw is NOT keyed here — SceneObjectManager drives an idle pendulum so the
  * head never completes a full turn. Pitch stays a small nod; roll stays 0.
  * `lateral` is screen-space X (-1 left … 1 right). Path: hero center → about
- * right → projects left → faq right → contact center. Side rest is half of
+ * right → projects left → faq center → contact right. Side rest is half of
  * full edge travel; a scroll hold keeps it parked before it crosses back.
  * The camera does not track this X, or the bust would appear to snap back
  * to mid-frame. Full scale is hero-only; later sections recede until hero.
@@ -93,7 +93,7 @@ export const sectionAnchors: Record<SectionSlug, SceneAnchor> = {
       position: [0, 0.03, -0.3],
       rotation: [0.05, 0, 0],
       scale: [1.0, 1.0, 1.0],
-      lateral: SCENE_LATERAL.side,
+      lateral: 0,
     },
     materialPreset: "chrome",
     cameraHint: {
@@ -118,7 +118,7 @@ export const sectionAnchors: Record<SectionSlug, SceneAnchor> = {
       position: [0, -0.06, 0],
       rotation: [0.05, 0, 0],
       scale: [0.98, 0.98, 0.98],
-      lateral: 0,
+      lateral: SCENE_LATERAL.side,
     },
     /** Neutral cool tint; avoid "neon" here — emissive + rim read as harsh green on the scan. */
     materialPreset: "glass",
