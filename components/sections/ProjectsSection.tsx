@@ -18,6 +18,9 @@ export default function ProjectsSection() {
         <RevealText as="h2" className="section-title">
           A collection of my work.
         </RevealText>
+        <p data-reveal className="project-marquee-hint" aria-hidden="true">
+          Drag or swipe to explore
+        </p>
       </section>
       <ProjectsMarquee />
     </div>

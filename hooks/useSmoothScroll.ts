@@ -7,6 +7,12 @@ import { ScrollTrigger } from "gsap/ScrollTrigger";
 
 gsap.registerPlugin(ScrollTrigger);
 
+let lenisInstance: Lenis | null = null;
+
+export function getLenis(): Lenis | null {
+  return lenisInstance;
+}
+
 export function useSmoothScroll() {
   useEffect(() => {
     const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -22,6 +28,8 @@ export function useSmoothScroll() {
       touchMultiplier: isTouch ? 1.15 : 1.5,
     });
 
+    lenisInstance = lenis;
+
     const onRaf = (time: number) => {
       lenis.raf(time * 1000);
     };
@@ -31,6 +39,7 @@ export function useSmoothScroll() {
     gsap.ticker.lagSmoothing(0);
 
     return () => {
+      lenisInstance = null;
       lenis.destroy();
       gsap.ticker.remove(onRaf);
     };
