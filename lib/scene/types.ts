@@ -19,6 +19,11 @@ export type SceneAnchor = {
     position: [number, number, number];
     rotation: [number, number, number];
     scale: [number, number, number];
+    /**
+     * Viewport X as a fraction of the visible half-width.
+     * -1 = far left, 0 = center, 1 = far right.
+     */
+    lateral: number;
   };
   materialPreset: MaterialPreset;
   cameraHint?: {

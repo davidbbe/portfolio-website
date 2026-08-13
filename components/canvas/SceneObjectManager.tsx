@@ -5,11 +5,13 @@ import { sectionAnchors } from "@/lib/scene/sectionAnchors";
 import {
   HERO_SCENE_MODEL_GLB,
   SCENE_DAMPING,
+  SCENE_LATERAL,
   SCENE_MOTION,
   SECTION_ORDER,
 } from "@/lib/scene/sceneConfig";
-import { sectionBlend } from "@/lib/scene/scrollAlong";
+import { plateauBlendT, sectionBlend } from "@/lib/scene/scrollAlong";
 import type { MaterialPreset, SectionSlug } from "@/lib/scene/types";
+import { worldXFromLateral } from "@/lib/scene/viewportX";
 import { ContactShadows, useGLTF } from "@react-three/drei";
 import { useFrame, useThree } from "@react-three/fiber";
 import gsap from "gsap";
@@ -23,6 +25,7 @@ import {
   MeshPhysicalMaterial,
   MeshStandardMaterial,
   Object3D,
+  PerspectiveCamera,
   PointLight,
   Texture,
   Vector3,
@@ -400,7 +403,7 @@ function tweenMaterialToPreset(
 export default function SceneObjectManager() {
   const { scrollAlongRef } = useSceneState();
   const { scene } = useGLTF(HERO_SCENE_MODEL_GLB);
-  const { gl } = useThree();
+  const { gl, camera, size } = useThree();
   const [viewportScaleBoost, setViewportScaleBoost] = useState(
     VIEWPORT_SCALE_MOBILE,
   );
@@ -432,7 +435,7 @@ export default function SceneObjectManager() {
   const mobileHeroFadeRef = useRef<Group>(null);
   /** Subtle idle drift; kept separate so pose damping can own `poseGroupRef`. */
   const driftGroupRef = useRef<Group>(null);
-  /** Turntable: only `rotation.y` — idle spin + scroll yaw in one direction. */
+  /** Pendulum yaw: only `rotation.y` — swings until a sliver of the back, then reverses. */
   const spinGroupRef = useRef<Group>(null);
   const rimLightRef = useRef<PointLight>(null);
   const materialsRef = useRef<(MeshStandardMaterial | MeshPhysicalMaterial)[]>(
@@ -444,7 +447,10 @@ export default function SceneObjectManager() {
   const frameClockRef = useRef(0);
   const alongSmoothRef = useRef(0);
   const alongReadyRef = useRef(false);
-  const idleYawRef = useRef(0);
+  const lateralSmoothRef = useRef(0);
+  const lateralReadyRef = useRef(false);
+  const modelHalfWidthRef = useRef(0.55);
+  const idlePhaseRef = useRef(0);
   const introProgressRef = useRef(0);
 
   const model = useMemo(() => {
@@ -465,6 +471,8 @@ export default function SceneObjectManager() {
     clone.updateMatrixWorld(true);
     const box = new Box3().setFromObject(clone);
     if (!box.isEmpty()) {
+      const size = box.getSize(new Vector3());
+      modelHalfWidthRef.current = Math.max(size.x, size.z) * 0.5;
       clone.position.sub(box.getCenter(new Vector3()));
     }
     return clone;
@@ -494,7 +502,7 @@ export default function SceneObjectManager() {
     const preset = materialPresets[anchor.materialPreset];
     const presetKey = anchor.materialPreset;
     const safePosition = {
-      x: clamp(anchor.objectTransform.position[0], -1.05, 1.05),
+      x: 0,
       y: clamp(anchor.objectTransform.position[1], -0.4, 0.4),
       z: clamp(anchor.objectTransform.position[2], -0.65, 0.1),
     };
@@ -642,13 +650,16 @@ export default function SceneObjectManager() {
       0,
     );
 
-    idleYawRef.current += dt * SCENE_MOTION.idleSpin;
+    idlePhaseRef.current += (dt * Math.PI * 2) / SCENE_MOTION.yawPeriod;
+    const yawMin = SCENE_MOTION.yawSwingMin;
+    const yawMax = SCENE_MOTION.yawSwingMax;
+    const yawCenter = (yawMin + yawMax) * 0.5;
+    const yawAmplitude = (yawMax - yawMin) * 0.5;
+    const pendulumYaw =
+      yawCenter + Math.sin(idlePhaseRef.current) * yawAmplitude;
     spin.rotation.set(
       0,
-      MODEL_FORWARD_YAW_OFFSET +
-        SCENE_MOTION.baseYaw +
-        idleYawRef.current +
-        along * SCENE_MOTION.scrollYawPerSection,
+      MODEL_FORWARD_YAW_OFFSET + SCENE_MOTION.baseYaw + pendulumYaw,
       0,
     );
 
@@ -659,13 +670,6 @@ export default function SceneObjectManager() {
     const scA = anchorA.objectTransform.scale;
     const scB = anchorB.objectTransform.scale;
 
-    pose.position.set(
-      clamp(MathUtils.lerp(posA[0], posB[0], t), -1.05, 1.05),
-      clamp(MathUtils.lerp(posA[1], posB[1], t), -0.4, 0.4),
-      clamp(MathUtils.lerp(posA[2], posB[2], t), -0.65, 0.1),
-    );
-    pose.rotation.set(MathUtils.lerp(rotA[0], rotB[0], t), 0, 0);
-
     introProgressRef.current = Math.min(
       1,
       introProgressRef.current + dt / INTRO_DURATION,
@@ -675,17 +679,44 @@ export default function SceneObjectManager() {
       1,
       1 - Math.pow(1 - introProgressRef.current, 4),
     );
-    pose.scale.set(
-      clamp(MathUtils.lerp(scA[0], scB[0], t), 1, 1.35) *
-        viewportScaleBoost *
-        introMul,
-      clamp(MathUtils.lerp(scA[1], scB[1], t), 1, 1.35) *
-        viewportScaleBoost *
-        introMul,
-      clamp(MathUtils.lerp(scA[2], scB[2], t), 1, 1.35) *
-        viewportScaleBoost *
-        introMul,
+    const scaleUniform =
+      clamp(MathUtils.lerp(scA[0], scB[0], t), 0.9, 1.35) *
+      viewportScaleBoost *
+      introMul;
+    pose.scale.set(scaleUniform, scaleUniform, scaleUniform);
+    pose.rotation.set(MathUtils.lerp(rotA[0], rotB[0], t), 0, 0);
+
+    const poseY = clamp(MathUtils.lerp(posA[1], posB[1], t), -0.4, 0.4);
+    const poseZ = clamp(MathUtils.lerp(posA[2], posB[2], t), -0.65, 0.1);
+    const lateralT = plateauBlendT(t, SCENE_LATERAL.hold);
+    const lateral = MathUtils.lerp(
+      anchorA.objectTransform.lateral,
+      anchorB.objectTransform.lateral,
+      lateralT,
     );
+    let targetX = 0;
+    if (camera instanceof PerspectiveCamera) {
+      const meshHalf = modelHalfWidthRef.current * scaleUniform;
+      targetX = worldXFromLateral(
+        lateral,
+        camera,
+        poseZ,
+        meshHalf,
+        size.width / Math.max(1, size.height),
+      );
+    }
+    if (!lateralReadyRef.current) {
+      lateralSmoothRef.current = targetX;
+      lateralReadyRef.current = true;
+    } else {
+      lateralSmoothRef.current = MathUtils.damp(
+        lateralSmoothRef.current,
+        targetX,
+        SCENE_DAMPING.lateral,
+        dt,
+      );
+    }
+    pose.position.set(lateralSmoothRef.current, poseY, poseZ);
 
     if (materials.length === 0) {
       applyMobileHeroScrollFade();

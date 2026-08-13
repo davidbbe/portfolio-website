@@ -17,8 +17,8 @@ export default function SceneRig() {
   const alongSmoothRef = useRef(0);
   const alongReadyRef = useRef(false);
   const targetPosition = useRef(new Vector3(0, 0.02, 5.22));
-  const lookTarget = useRef(new Vector3(0.16, 0.04, 0));
-  const lookSmoothed = useRef(new Vector3(0.16, 0.04, 0));
+  const lookTarget = useRef(new Vector3(0, 0.04, 0));
+  const lookSmoothed = useRef(new Vector3(0, 0.04, 0));
 
   useEffect(() => {
     const onMouseMove = (event: MouseEvent) => {
@@ -68,7 +68,6 @@ export default function SceneRig() {
 
     const lookA = anchorA.objectTransform.position;
     const lookB = anchorB.objectTransform.position;
-    const lookX = MathUtils.lerp(lookA[0], lookB[0], t);
     const lookY = MathUtils.lerp(lookA[1], lookB[1], t);
     const lookZ = MathUtils.lerp(lookA[2], lookB[2], t);
 
@@ -89,7 +88,9 @@ export default function SceneRig() {
     }
 
     lookTarget.current.set(
-      lookX + mouse.x * mouseProfile.rotationStrength * 0.15,
+      // Keep look-at X on the scene center so lateral pose actually reads as
+      // left/right on the page. Tracking the bust recenters it when scroll stops.
+      mouse.x * mouseProfile.rotationStrength * 0.15,
       lookY - mouse.y * mouseProfile.rotationStrength * 0.15,
       lookZ,
     );

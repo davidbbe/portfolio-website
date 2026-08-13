@@ -76,11 +76,36 @@ export function useSceneScrollDriver({
 
     window.addEventListener("scroll", schedule, { passive: true });
     window.addEventListener("resize", schedule);
+
+    let cancelled = false;
+    let attachRaf = 0;
+    let detachLenis: (() => void) | undefined;
+    let lenisRetries = 0;
+    const attachLenis = () => {
+      if (cancelled) {
+        return;
+      }
+      const lenis = getLenis();
+      if (!lenis) {
+        if (lenisRetries < 45) {
+          lenisRetries += 1;
+          attachRaf = requestAnimationFrame(attachLenis);
+        }
+        return;
+      }
+      detachLenis = lenis.on("scroll", schedule);
+    };
+    attachLenis();
     tick();
 
     return () => {
+      cancelled = true;
+      if (attachRaf) {
+        cancelAnimationFrame(attachRaf);
+      }
       window.removeEventListener("scroll", schedule);
       window.removeEventListener("resize", schedule);
+      detachLenis?.();
       if (rafRef.current) {
         cancelAnimationFrame(rafRef.current);
         rafRef.current = 0;

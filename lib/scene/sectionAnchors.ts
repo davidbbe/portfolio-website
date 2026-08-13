@@ -1,19 +1,24 @@
 import type { SceneAnchor, SectionSlug } from "./types";
+import { SCENE_LATERAL } from "./sceneConfig";
 
 /**
  * Cinematic path for the bust as you scroll.
  *
- * Yaw is NOT keyed here — SceneObjectManager drives a single monotonically
- * increasing yaw from scroll so the head never reverses mid-page.
- * Pitch stays a small nod; roll stays 0 to avoid tumbling.
- * After hero, the bust lives on the right and recedes; it does not jump back to center.
+ * Yaw is NOT keyed here — SceneObjectManager drives an idle pendulum so the
+ * head never completes a full turn. Pitch stays a small nod; roll stays 0.
+ * `lateral` is screen-space X (-1 left … 1 right). Path: hero center → about
+ * right → projects left → faq right → contact center. Side rest is half of
+ * full edge travel; a scroll hold keeps it parked before it crosses back.
+ * The camera does not track this X, or the bust would appear to snap back
+ * to mid-frame. Full scale is hero-only; later sections recede until hero.
  */
 export const sectionAnchors: Record<SectionSlug, SceneAnchor> = {
   hero: {
     objectTransform: {
-      position: [0.16, 0.04, 0],
+      position: [0, 0.04, 0],
       rotation: [0.06, 0, 0],
       scale: [1.35, 1.35, 1.35],
+      lateral: 0,
     },
     materialPreset: "glass",
     cameraHint: {
@@ -35,13 +40,14 @@ export const sectionAnchors: Record<SectionSlug, SceneAnchor> = {
   },
   about: {
     objectTransform: {
-      position: [0.82, 0.06, -0.2],
+      position: [0, 0.06, -0.2],
       rotation: [0.055, 0, 0],
-      scale: [1.24, 1.24, 1.24],
+      scale: [1.1, 1.1, 1.1],
+      lateral: SCENE_LATERAL.side,
     },
     materialPreset: "matte",
     cameraHint: {
-      position: [0.04, 0.06, 5.32],
+      position: [0, 0.06, 5.32],
       fov: 47,
     },
     mouseProfile: {
@@ -59,13 +65,14 @@ export const sectionAnchors: Record<SectionSlug, SceneAnchor> = {
   },
   projects: {
     objectTransform: {
-      position: [0.7, -0.02, -0.46],
+      position: [0, -0.02, -0.36],
       rotation: [0.05, 0, 0],
-      scale: [1.16, 1.16, 1.16],
+      scale: [1.02, 1.02, 1.02],
+      lateral: -SCENE_LATERAL.side,
     },
     materialPreset: "chrome",
     cameraHint: {
-      position: [0.02, 0, 5.38],
+      position: [0, 0, 5.38],
       fov: 46.5,
     },
     mouseProfile: {
@@ -83,13 +90,14 @@ export const sectionAnchors: Record<SectionSlug, SceneAnchor> = {
   },
   faq: {
     objectTransform: {
-      position: [0.88, 0.03, -0.3],
+      position: [0, 0.03, -0.3],
       rotation: [0.05, 0, 0],
-      scale: [1.18, 1.18, 1.18],
+      scale: [1.0, 1.0, 1.0],
+      lateral: SCENE_LATERAL.side,
     },
     materialPreset: "chrome",
     cameraHint: {
-      position: [0.04, 0.03, 5.28],
+      position: [0, 0.03, 5.28],
       fov: 47,
     },
     mouseProfile: {
@@ -107,14 +115,15 @@ export const sectionAnchors: Record<SectionSlug, SceneAnchor> = {
   },
   contact: {
     objectTransform: {
-      position: [0.8, -0.14, -0.24],
+      position: [0, -0.06, 0],
       rotation: [0.05, 0, 0],
-      scale: [1.2, 1.2, 1.2],
+      scale: [0.98, 0.98, 0.98],
+      lateral: 0,
     },
     /** Neutral cool tint; avoid "neon" here — emissive + rim read as harsh green on the scan. */
     materialPreset: "glass",
     cameraHint: {
-      position: [0.03, -0.04, 5.18],
+      position: [0, -0.02, 5.18],
       fov: 48,
     },
     mouseProfile: {

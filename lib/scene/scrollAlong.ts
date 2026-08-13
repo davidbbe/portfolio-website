@@ -9,6 +9,22 @@ export function sectionBlend(along: number, sectionCount: number) {
   return { i, j, t: clamped - i, along: clamped };
 }
 
+/**
+ * Remap 0–1 blend `t` so the pose holds at each end, then eases through the middle.
+ * `hold` is the fraction of the scroll spent parked at the start and at the end.
+ */
+export function plateauBlendT(t: number, hold: number) {
+  const h = Math.min(Math.max(hold, 0), 0.45);
+  if (t <= h) {
+    return 0;
+  }
+  if (t >= 1 - h) {
+    return 1;
+  }
+  const u = (t - h) / (1 - 2 * h);
+  return u * u * (3 - 2 * u);
+}
+
 /** Float index in [0, SECTION_ORDER.length - 1]: whole numbers land on section centers; fractional = blend toward the next section. */
 export function scrollAlongForLerp(
   viewportCenterY: number,

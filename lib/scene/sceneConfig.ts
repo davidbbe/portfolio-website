@@ -19,20 +19,36 @@ export const SCROLL_TRIGGER_DEFAULTS = {
 export const SCENE_DAMPING = {
   along: 5.4,
   camera: 4.8,
+  /** Side-to-side slide — slower than `along` so it eases to the edge instead of snapping. */
+  lateral: 3.15,
 };
 
 /**
- * Scroll choreography for the bust.
- * Yaw only ever increases as you scroll down (and decreases on the way back) —
- * never ping-pongs between section keyframes.
+ * Viewport X for the bust. `side` is a fraction of full half-width travel
+ * (1 = near the page edge). `hold` is how much of each section-to-section
+ * scroll stays parked at the current side before crossing.
+ */
+export const SCENE_LATERAL = {
+  side: 0.5,
+  hold: 0.26,
+};
+
+/**
+ * Idle yaw is a pendulum, not a turntable. The two extremes are asymmetric
+ * because the scan’s facing isn’t centered: one side peeks the back sooner.
  */
 export const SCENE_MOTION = {
-  /** Extra yaw (radians) per section index. Same sign all the way down the page. */
-  scrollYawPerSection: 0.22,
-  /** Slight 3/4 facing on top of the glTF forward offset (~12°). */
-  baseYaw: 0.2,
-  /** Slow idle turntable (rad/s). Same sign as scroll yaw so they never fight. */
-  idleSpin: 0.045,
+  /** Slight 3/4 facing on top of the glTF forward offset (~7°). */
+  baseYaw: 0.12,
+  /** First reverse (radians). ~110° — sliver of the back, then turns around. */
+  yawSwingMax: 1.92,
+  /**
+   * Second reverse (radians). Shallower than the first so the far side never
+   * reaches a full reverse three-quarter.
+   */
+  yawSwingMin: -1,
+  /** Full left–right–left cycle in seconds. */
+  yawPeriod: 38,
 };
 
 /** Lower bloom / noise / chroma keeps the photogrammetry albedo sharper (less haze / fringing). */
