@@ -1,5 +1,5 @@
 ---
-description: When starting npm run dev, use a visible integrated terminal and tell the user how to find and stop it
+description: Start npm run dev in a visible terminal; always stop any agent-started server before ending the chat
 alwaysApply: true
 ---
 
@@ -19,3 +19,11 @@ When you start a long-running dev server for this project (e.g. `npm run dev`, `
 4. **Avoid duplicate servers** — Before starting another dev server, mention if one may already be running on the default port, or suggest checking existing terminal tabs / `lsof -iTCP:3000 -sTCP:LISTEN` so the user does not end up on the wrong port.
 
 Note: The agent cannot force Cursor to focus the Terminal view; the user may need to open **View → Terminal** (macOS: **Ctrl+`** ) and click the correct tab.
+
+## Always stop servers the agent started
+
+If **you** started `npm run dev` / `next dev` in this chat (including agent/background terminals), you **must stop it** when the work that needed it is done — before the final reply, and especially if the user is closing the project or wrapping up.
+
+- Kill the process you started (parent `npm` **and** child `next`/`node` if needed) so port 3000 (or the fallback port) is free.
+- Do **not** leave an agent-started server running. Cursor will then show “Background terminal is still running” and block closing the window.
+- Do **not** kill a server the user started themselves in their own terminal. Only stop processes this agent chat started.
