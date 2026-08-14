@@ -142,8 +142,8 @@ export const projectsData: readonly ProjectItem[] = [
     url: "https://skatedog.daveb.co",
     description: "I designed and developed this game. It is a simple game that uses Three.js to create a 3D environment and physics simulation. Its available as a web app and as a direct download native app for either iOS or Android. The native app is built with Capacitor and Neon NoSQL for the high score database.",
     image: "/images/portfolio/Skate-Dog-the-game.jpg",
-    featuredTags: ["Vite", "Three.js", "Capacitor"],
-    tags: ["React", "Vite", "Tailwind", "Three.js", "Capacitor", "PostgreSQL", "Neon Database", "Vercel"],
+    featuredTags: ["Vite", "Three.js", "Capacitor", "Xcode", "Android Studio"],
+    tags: ["React", "Vite", "Tailwind", "Three.js", "Capacitor", "Xcode", "Android Studio", "PostgreSQL", "Neon Database", "Vercel"],
   },
   {
     title: "Restaurant Roulette",

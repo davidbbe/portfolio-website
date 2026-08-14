@@ -1071,7 +1071,6 @@
 /* ── Marquee viewport ── */
 
 .project-marquee {
-  --marquee-gutter: max(1.35rem, calc((100% - 76rem) / 2 + 1.35rem));
   width: 100%;
   overflow: hidden;
   cursor: grab;
@@ -1081,20 +1080,17 @@
   -webkit-user-select: none;
   padding-top: 1.5rem;
   padding-bottom: 6rem;
-  padding-left: var(--marquee-gutter);
   -webkit-mask-image: linear-gradient(
     to right,
     transparent 0,
-    transparent var(--marquee-gutter),
-    #000 calc(var(--marquee-gutter) + 0.85rem),
+    #000 4.5rem,
     #000 calc(100% - 4.5rem),
     transparent 100%
   );
   mask-image: linear-gradient(
     to right,
     transparent 0,
-    transparent var(--marquee-gutter),
-    #000 calc(var(--marquee-gutter) + 0.85rem),
+    #000 4.5rem,
     #000 calc(100% - 4.5rem),
     transparent 100%
   );
@@ -1672,16 +1668,14 @@ button.project-card {
     -webkit-mask-image: linear-gradient(
       to right,
       transparent 0,
-      transparent var(--marquee-gutter),
-      #000 calc(var(--marquee-gutter) + 0.65rem),
+      #000 2.25rem,
       #000 calc(100% - 2.25rem),
       transparent 100%
     );
     mask-image: linear-gradient(
       to right,
       transparent 0,
-      transparent var(--marquee-gutter),
-      #000 calc(var(--marquee-gutter) + 0.65rem),
+      #000 2.25rem,
       #000 calc(100% - 2.25rem),
       transparent 100%
     );
