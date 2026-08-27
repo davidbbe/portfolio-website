@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useEffect, useState, useCallback } from "react";
+import { useRef, useEffect, useLayoutEffect, useState, useCallback } from "react";
 import Image from "next/image";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
@@ -230,7 +230,9 @@ export default function ProjectsMarquee() {
   const modalOpenRef = useRef(false);
   const [activeProject, setActiveProject] = useState<ProjectItem | null>(null);
 
-  modalOpenRef.current = activeProject !== null;
+  useLayoutEffect(() => {
+    modalOpenRef.current = activeProject !== null;
+  }, [activeProject]);
 
   useEffect(() => {
     const viewport = viewportRef.current;

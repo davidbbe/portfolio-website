@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useCallback } from "react";
 import Image from "next/image";
+import Link from "next/link";
 import gsap from "gsap";
 import { heroSection } from "@/lib/content/sections";
 
@@ -59,7 +60,6 @@ const TECH_LOGOS = [
 
 export default function HeroSection() {
   const sectionRef = useRef<HTMLElement>(null);
-  const hasAnimated = useRef(false);
   const btnWrapRef = useRef<HTMLDivElement>(null);
   const glowRef = useRef<HTMLDivElement>(null);
 
@@ -90,9 +90,6 @@ export default function HeroSection() {
   }, []);
 
   useEffect(() => {
-    if (hasAnimated.current) return;
-    hasAnimated.current = true;
-
     const section = sectionRef.current;
     if (!section) return;
 
@@ -109,75 +106,77 @@ export default function HeroSection() {
     const trust = section.querySelector<HTMLElement>("[data-hero-trust]");
     const cta = section.querySelector<HTMLElement>("[data-hero-cta]");
 
-    if (prefersReduced) {
-      [nav, trust, cta].forEach((el) => {
-        if (el) {
+    const ctx = gsap.context(() => {
+      if (prefersReduced) {
+        [nav, trust, cta].forEach((el) => {
+          if (el) {
+            el.style.opacity = "1";
+            el.style.transform = "none";
+          }
+        });
+        logos.forEach((el) => {
           el.style.opacity = "1";
           el.style.transform = "none";
-        }
-      });
-      logos.forEach((el) => {
-        el.style.opacity = "1";
-        el.style.transform = "none";
-      });
-      h1Lines.forEach((el) => {
-        el.style.transform = "translateY(0)";
-      });
-      subLines.forEach((el) => {
-        el.style.transform = "translateY(0)";
-      });
-      startBorderOrbit();
-      return;
-    }
+        });
+        h1Lines.forEach((el) => {
+          el.style.transform = "translateY(0)";
+        });
+        subLines.forEach((el) => {
+          el.style.transform = "translateY(0)";
+        });
+        startBorderOrbit();
+        return;
+      }
 
-    gsap.set(nav, { opacity: 0, y: -20 });
-    gsap.set(h1Lines, { yPercent: 110 });
-    gsap.set(subLines, { yPercent: 110 });
-    gsap.set(logos, { opacity: 0, scale: 0.4, y: 12 });
-    gsap.set(trust, { yPercent: 110 });
-    gsap.set(cta, { opacity: 0, y: 30 });
+      gsap.set(nav, { opacity: 0, y: -20 });
+      gsap.set(h1Lines, { yPercent: 110 });
+      gsap.set(subLines, { yPercent: 110 });
+      gsap.set(logos, { opacity: 0, scale: 0.4, y: 12 });
+      gsap.set(trust, { yPercent: 110 });
+      gsap.set(cta, { opacity: 0, y: 30 });
 
-    const tl = gsap.timeline({
-      defaults: { ease: "power3.out" },
-      delay: 0.3,
-    });
+      const tl = gsap.timeline({
+        defaults: { ease: "power3.out" },
+        delay: 0.3,
+      });
 
-    tl.to(nav, { opacity: 1, y: 0, duration: 0.8 })
-      .to(h1Lines[0], { yPercent: 0, duration: 1.1, ease: "power4.out" }, 0.4)
-      .to(h1Lines[1], { yPercent: 0, duration: 1.1, ease: "power4.out" }, 0.55)
-      .to(
-        subLines,
-        {
-          yPercent: 0,
-          duration: 0.9,
-          stagger: 0.08,
-          ease: "power3.out",
-        },
-        0.75,
-      )
-      .to(
-        logos,
-        {
-          opacity: 1,
-          scale: 1,
-          y: 0,
-          duration: 0.5,
-          stagger: 0.12,
-          ease: "back.out(1.7)",
-          onComplete() {
-            logos.forEach((el) => {
-              gsap.set(el, { clearProps: "transform" });
-            });
+      tl.to(nav, { opacity: 1, y: 0, duration: 0.8 })
+        .to(h1Lines[0], { yPercent: 0, duration: 1.1, ease: "power4.out" }, 0.4)
+        .to(h1Lines[1], { yPercent: 0, duration: 1.1, ease: "power4.out" }, 0.55)
+        .to(
+          subLines,
+          {
+            yPercent: 0,
+            duration: 0.9,
+            stagger: 0.08,
+            ease: "power3.out",
           },
-        },
-        1.0,
-      )
-      .to(trust, { yPercent: 0, duration: 0.8, ease: "power3.out" }, 1.1)
-      .to(cta, { opacity: 1, y: 0, duration: 0.7, ease: "power3.out" }, 1.25)
-      .call(startBorderOrbit, undefined, 1.6);
+          0.75,
+        )
+        .to(
+          logos,
+          {
+            opacity: 1,
+            scale: 1,
+            y: 0,
+            duration: 0.5,
+            stagger: 0.12,
+            ease: "back.out(1.7)",
+            onComplete() {
+              logos.forEach((el) => {
+                gsap.set(el, { clearProps: "transform" });
+              });
+            },
+          },
+          1.0,
+        )
+        .to(trust, { yPercent: 0, duration: 0.8, ease: "power3.out" }, 1.1)
+        .to(cta, { opacity: 1, y: 0, duration: 0.7, ease: "power3.out" }, 1.25)
+        .call(startBorderOrbit, undefined, 1.6);
+    }, section);
 
     return () => {
-      tl.kill();
+      ctx.revert();
     };
   }, [startBorderOrbit]);
 
@@ -190,9 +189,9 @@ export default function HeroSection() {
       className="creative-hero"
     >
       <nav data-hero-nav className="creative-hero__nav">
-        <a href="/" className="creative-hero__logo" aria-label="home">
+        <Link href="/" className="creative-hero__logo" aria-label="home">
           <span className="creative-hero__logo-text">David Beauchamp</span>
-        </a>
+        </Link>
         <a
           href="#testimonials"
           className="creative-hero__nav-icon"

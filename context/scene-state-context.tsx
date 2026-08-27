@@ -14,7 +14,7 @@ type SceneStateContextType = {
   activeSection: SectionSlug;
   setActiveSection: React.Dispatch<React.SetStateAction<SectionSlug>>;
   /** Continuous scroll index for blending 3D poses (0 = hero … see SECTION_ORDER). */
-  scrollAlongRef: React.MutableRefObject<number>;
+  scrollAlongRef: React.RefObject<number>;
 };
 
 const SceneStateContext = createContext<SceneStateContextType | null>(null);

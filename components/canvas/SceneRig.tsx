@@ -1,5 +1,8 @@
 "use client";
 
+/* R3F useFrame is supposed to mutate the three.js camera each tick. */
+/* eslint-disable react-hooks/immutability */
+
 import { useSceneState } from "@/context/scene-state-context";
 import { useSectionMouseProfile } from "@/hooks/useSectionMouseProfile";
 import { SCENE_DAMPING, SECTION_ORDER } from "@/lib/scene/sceneConfig";

@@ -3,7 +3,7 @@
 import { Environment } from "@react-three/drei";
 import { Canvas } from "@react-three/fiber";
 import { Suspense, useEffect, useState } from "react";
-import { ACESFilmicToneMapping, PCFSoftShadowMap } from "three";
+import { ACESFilmicToneMapping, PCFShadowMap } from "three";
 import SceneObjectManager from "./SceneObjectManager";
 import SceneRig from "./SceneRig";
 import PostFX from "./effects/PostFX";
@@ -67,14 +67,14 @@ export default function GlobalSceneCanvas() {
       className="canvas-shell canvas-shell--front"
     >
       <Canvas
-        shadows="soft"
+        shadows
         dpr={isNarrowViewport ? [1, 1.35] : [1, 2]}
         gl={{ alpha: true, antialias: true }}
         onCreated={({ gl }) => {
           gl.setClearColor("#000000", 0);
           gl.toneMapping = ACESFilmicToneMapping;
           gl.toneMappingExposure = 1.08;
-          gl.shadowMap.type = PCFSoftShadowMap;
+          gl.shadowMap.type = PCFShadowMap;
         }}
         camera={{ position: [0, 0.02, 5.22], fov: 48, near: 0.1, far: 100 }}
       >

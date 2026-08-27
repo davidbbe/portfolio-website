@@ -20,7 +20,7 @@ export default function SectionInteractiveLayer() {
   const { activeSection } = useSceneState();
   const dotRef = useRef<HTMLDivElement>(null);
   const mouseRef = useRef({ x: 0, y: 0 });
-  const rafRef = useRef<number>();
+  const rafRef = useRef<number | null>(null);
 
   const tone = useMemo(() => sectionTone[activeSection], [activeSection]);
 

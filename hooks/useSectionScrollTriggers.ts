@@ -10,7 +10,7 @@ import { ScrollTrigger } from "gsap/ScrollTrigger";
 gsap.registerPlugin(ScrollTrigger);
 
 type UseSectionScrollTriggersParams = {
-  scopeRef: React.RefObject<HTMLElement>;
+  scopeRef: React.RefObject<HTMLElement | null>;
 };
 
 export function useSectionScrollTriggers({

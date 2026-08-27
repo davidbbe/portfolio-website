@@ -4,10 +4,29 @@ Single-page portfolio with scroll-driven 2D reveals, a global React Three Fiber 
 
 ## Setup
 
-1. `npm install`
-2. `npm run dev`
+This project requires **Node.js 24** via [nvm](https://github.com/nvm-sh/nvm). A `.nvmrc` file pins the major version.
+
+1. `nvm install` (uses `.nvmrc`)
+2. `nvm use`
+3. `npm install`
+4. `npm run dev`
 
 Other scripts: `npm run build`, `npm run start`, `npm run lint`, `npm run clean` (removes `.next`).
+
+If you use nvm, add this to `~/.zshrc` (or `~/.bashrc`) so entering the repo always selects Node 24:
+
+```sh
+autoload -U add-zsh-hook
+load-nvmrc() {
+  local nvmrc_path
+  nvmrc_path="$(nvm_find_nvmrc)"
+  if [ -n "$nvmrc_path" ]; then
+    nvm use
+  fi
+}
+add-zsh-hook chpwd load-nvmrc
+load-nvmrc
+```
 
 ## What’s on the page
 
@@ -25,7 +44,8 @@ Copy and structured section data live in `lib/content/sections.ts`. Section orde
 
 | Area | Tech |
 |------|------|
-| Framework | Next.js (App Router), React 18, TypeScript |
+| Runtime | Node.js 24 (nvm, see `.nvmrc`) |
+| Framework | Next.js (App Router), React 19, TypeScript |
 | Styling | Tailwind CSS + project styles in `styles/creative.css` (imported from `app/globals.css`) |
 | Typography | `next/font/google` — Sora and Manrope as CSS variables |
 | 3D | Three.js, React Three Fiber, Drei, `@react-three/postprocessing` (bloom, film-style noise, chromatic aberration via `postprocessing`) |

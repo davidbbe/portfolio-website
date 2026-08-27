@@ -9,7 +9,7 @@ import {
   Section,
   Text,
   Link,
-} from "@react-email/components";
+} from "react-email";
 
 type ContactFormEmailProps = {
   message: string;

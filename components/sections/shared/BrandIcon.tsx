@@ -30,6 +30,7 @@ import {
 } from "react-icons/si";
 import { HiCommandLine } from "react-icons/hi2";
 import type { IconType } from "react-icons";
+import type { ReactElement } from "react";
 
 const iconMap: Record<string, IconType> = {
   react: SiReact,
@@ -79,7 +80,7 @@ function NeonIcon() {
   );
 }
 
-const customIconMap: Record<string, () => JSX.Element> = {
+const customIconMap: Record<string, () => ReactElement> = {
   neon: NeonIcon,
 };
 

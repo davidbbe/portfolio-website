@@ -240,7 +240,6 @@ function tintedBaseColor(preset: MaterialPresetConfig) {
 function applyPresetToMaterial(
   mat: MeshStandardMaterial | MeshPhysicalMaterial,
   preset: MaterialPresetConfig,
-  presetKey: MaterialPreset,
 ) {
   const p = mat.userData.__pbr as PreservedPbr | undefined;
   if (!p) {
@@ -296,7 +295,6 @@ function killMaterialTweens(mat: MeshStandardMaterial | MeshPhysicalMaterial) {
 function tweenMaterialToPreset(
   mat: MeshStandardMaterial | MeshPhysicalMaterial,
   preset: MaterialPresetConfig,
-  presetKey: MaterialPreset,
 ) {
   const p = mat.userData.__pbr as PreservedPbr | undefined;
   if (!p) {
@@ -453,7 +451,7 @@ export default function SceneObjectManager() {
   const idlePhaseRef = useRef(0);
   const introProgressRef = useRef(0);
 
-  const model = useMemo(() => {
+  const preparedModel = useMemo(() => {
     const clone = scene.clone(true);
     const materials: (MeshStandardMaterial | MeshPhysicalMaterial)[] = [];
     clone.traverse((child) => {
@@ -467,21 +465,25 @@ export default function SceneObjectManager() {
         });
       }
     });
-    materialsRef.current = materials;
     clone.updateMatrixWorld(true);
     const box = new Box3().setFromObject(clone);
+    let halfWidth = 0.55;
     if (!box.isEmpty()) {
       const size = box.getSize(new Vector3());
-      modelHalfWidthRef.current = Math.max(size.x, size.z) * 0.5;
+      halfWidth = Math.max(size.x, size.z) * 0.5;
       clone.position.sub(box.getCenter(new Vector3()));
     }
-    return clone;
+    return { clone, materials, halfWidth };
   }, [scene]);
 
+  const model = preparedModel.clone;
+
   useLayoutEffect(() => {
+    materialsRef.current = preparedModel.materials;
+    modelHalfWidthRef.current = preparedModel.halfWidth;
     const maxAniso = Math.min(16, gl.capabilities.getMaxAnisotropy());
     applyMaxAnisotropy(model, maxAniso);
-  }, [model, gl]);
+  }, [preparedModel, model, gl]);
 
   const clamp = (value: number, min: number, max: number) =>
     Math.min(max, Math.max(min, value));
@@ -500,7 +502,6 @@ export default function SceneObjectManager() {
     enteredRef.current = true;
     const anchor = sectionAnchors.hero;
     const preset = materialPresets[anchor.materialPreset];
-    const presetKey = anchor.materialPreset;
     const safePosition = {
       x: 0,
       y: clamp(anchor.objectTransform.position[1], -0.4, 0.4),
@@ -520,7 +521,7 @@ export default function SceneObjectManager() {
     const accent = new Color(preset.accentLight);
 
     pose.visible = false;
-    materials.forEach((mat) => applyPresetToMaterial(mat, preset, presetKey));
+    materials.forEach((mat) => applyPresetToMaterial(mat, preset));
     rim.color.copy(accent);
     rim.intensity = preset.rimIntensity;
     pose.position.set(safePosition.x, safePosition.y, safePosition.z);
@@ -729,13 +730,12 @@ export default function SceneObjectManager() {
       lastMaterialSlugRef.current = materialSlug;
       const anchorM = sectionAnchors[materialSlug];
       const presetM = materialPresets[anchorM.materialPreset];
-      const presetKeyM = anchorM.materialPreset;
       const accentM = new Color(presetM.accentLight);
 
       materials.forEach((mat) => killMaterialTweens(mat));
 
       materials.forEach((mat) =>
-        tweenMaterialToPreset(mat, presetM, presetKeyM),
+        tweenMaterialToPreset(mat, presetM),
       );
       if (rim) {
         gsap.killTweensOf(rim);

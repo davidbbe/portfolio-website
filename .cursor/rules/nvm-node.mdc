@@ -1,0 +1,17 @@
+---
+description: Always use the nvm-managed Node.js 24 from .nvmrc
+alwaysApply: true
+---
+
+# Node.js via nvm
+
+This project is pinned to **Node.js 24** through nvm (see `.nvmrc`).
+
+When running Node, npm, or Next.js commands:
+
+1. Source nvm if it is not already loaded: `. "$HOME/.nvm/nvm.sh"`
+2. Select the project version: `nvm use` (install with `nvm install` if needed)
+3. Confirm `node -v` starts with `v24.` and `which node` is under `~/.nvm/versions/node/`
+4. Do not use Homebrew, system, or Volta Node for this repo
+
+`npm` scripts (`preinstall`, `predev`, `prebuild`) also refuse to run on any Node major other than 24.
