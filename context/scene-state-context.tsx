@@ -15,6 +15,7 @@ type SceneStateContextType = {
   setActiveSection: React.Dispatch<React.SetStateAction<SectionSlug>>;
   /** Continuous scroll index for blending 3D poses (0 = hero … see SECTION_ORDER). */
   scrollAlongRef: React.RefObject<number>;
+  pointerRef: React.RefObject<{ x: number; y: number }>;
 };
 
 const SceneStateContext = createContext<SceneStateContextType | null>(null);
@@ -22,8 +23,9 @@ const SceneStateContext = createContext<SceneStateContextType | null>(null);
 export function SceneStateProvider({ children }: { children: React.ReactNode }) {
   const [activeSection, setActiveSection] = useState<SectionSlug>(DEFAULT_SECTION);
   const scrollAlongRef = useRef(0);
+  const pointerRef = useRef({ x: 0, y: 0 });
   const value = useMemo(
-    () => ({ activeSection, setActiveSection, scrollAlongRef }),
+    () => ({ activeSection, setActiveSection, scrollAlongRef, pointerRef }),
     [activeSection],
   );
 

@@ -4,7 +4,7 @@
 /* eslint-disable react-hooks/immutability */
 
 import { useSceneState } from "@/context/scene-state-context";
-import { useSectionMouseProfile } from "@/hooks/useSectionMouseProfile";
+import { cinematicEase } from "@/lib/scene/motion";
 import { SCENE_DAMPING, SECTION_ORDER } from "@/lib/scene/sceneConfig";
 import { sectionAnchors } from "@/lib/scene/sectionAnchors";
 import { sectionBlend } from "@/lib/scene/scrollAlong";
@@ -13,10 +13,8 @@ import { useEffect, useRef } from "react";
 import { MathUtils, PerspectiveCamera, Vector3 } from "three";
 
 export default function SceneRig() {
-  const { scrollAlongRef } = useSceneState();
-  const mouseProfile = useSectionMouseProfile();
+  const { scrollAlongRef, pointerRef } = useSceneState();
   const { camera } = useThree();
-  const mouseRef = useRef({ x: 0, y: 0 });
   const alongSmoothRef = useRef(0);
   const alongReadyRef = useRef(false);
   const targetPosition = useRef(new Vector3(0, 0.02, 5.22));
@@ -24,15 +22,23 @@ export default function SceneRig() {
   const lookSmoothed = useRef(new Vector3(0, 0.04, 0));
 
   useEffect(() => {
-    const onMouseMove = (event: MouseEvent) => {
+    const onMouseMove = (event: PointerEvent) => {
+      if (event.pointerType !== "mouse") return;
       const x = (event.clientX / window.innerWidth) * 2 - 1;
       const y = (event.clientY / window.innerHeight) * 2 - 1;
-      mouseRef.current = { x, y };
+      pointerRef.current = { x, y };
     };
 
-    window.addEventListener("mousemove", onMouseMove, { passive: true });
-    return () => window.removeEventListener("mousemove", onMouseMove);
-  }, []);
+    const resetPointer = () => { pointerRef.current = { x: 0, y: 0 }; };
+    window.addEventListener("pointermove", onMouseMove, { passive: true });
+    document.documentElement.addEventListener("pointerleave", resetPointer);
+    window.addEventListener("blur", resetPointer);
+    return () => {
+      window.removeEventListener("pointermove", onMouseMove);
+      document.documentElement.removeEventListener("pointerleave", resetPointer);
+      window.removeEventListener("blur", resetPointer);
+    };
+  }, [pointerRef]);
 
   useFrame((_state, delta) => {
     if (!(camera instanceof PerspectiveCamera)) {
@@ -53,7 +59,8 @@ export default function SceneRig() {
     }
 
     const along = alongSmoothRef.current;
-    const { i, j, t } = sectionBlend(along, SECTION_ORDER.length);
+    const { i, j, t: linearT } = sectionBlend(along, SECTION_ORDER.length);
+    const t = cinematicEase(linearT);
     const slugA = SECTION_ORDER[i];
     const slugB = SECTION_ORDER[j];
     const anchorA = sectionAnchors[slugA];
@@ -74,7 +81,14 @@ export default function SceneRig() {
     const lookY = MathUtils.lerp(lookA[1], lookB[1], t);
     const lookZ = MathUtils.lerp(lookA[2], lookB[2], t);
 
-    const mouse = mouseRef.current;
+    const mouse = pointerRef.current;
+    const profileA = anchorA.mouseProfile;
+    const profileB = anchorB.mouseProfile;
+    const mouseProfile = {
+      xStrength: MathUtils.lerp(profileA.xStrength, profileB.xStrength, t),
+      yStrength: MathUtils.lerp(profileA.yStrength, profileB.yStrength, t),
+      rotationStrength: MathUtils.lerp(profileA.rotationStrength, profileB.rotationStrength, t),
+    };
     const camAlpha = 1 - Math.exp(-SCENE_DAMPING.camera * dt);
 
     targetPosition.current.set(

@@ -12,6 +12,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint .",
+    "test:motion": "node --experimental-strip-types --test tests/scene-motion.test.mjs",
     "clean": "rm -rf .next"
   },
   "dependencies": {

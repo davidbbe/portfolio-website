@@ -4,13 +4,10 @@ import { SCENE_LATERAL } from "./sceneConfig";
 /**
  * Cinematic path for the bust as you scroll.
  *
- * Yaw is NOT keyed here — SceneObjectManager drives an idle pendulum so the
- * head never completes a full turn. Pitch stays a small nod; roll stays 0.
- * `lateral` is screen-space X (-1 left … 1 right). Path: hero center → about
- * right → projects left → faq center → contact right. Side rest is half of
- * full edge travel; a scroll hold keeps it parked before it crosses back.
- * The camera does not track this X, or the bust would appear to snap back
- * to mid-frame. Full scale is hero-only; later sections recede until hero.
+ * Distinct section framing and three-quarter facing, joined by lifted depth
+ * arcs. Velocity adds a restrained bank; idle orbit and pointer response
+ * layer over the section rotation. Lateral is screen-space X, independent
+ * of the camera's look-at target so the portrait stays at its intended side.
  */
 export const sectionAnchors: Record<SectionSlug, SceneAnchor> = {
   hero: {
@@ -40,9 +37,9 @@ export const sectionAnchors: Record<SectionSlug, SceneAnchor> = {
   },
   about: {
     objectTransform: {
-      position: [0, 0.06, -0.2],
-      rotation: [0.055, 0, 0],
-      scale: [1.1, 1.1, 1.1],
+      position: [0, 0.16, -0.22],
+      rotation: [0.025, -0.3, -0.025],
+      scale: [1.16, 1.16, 1.16],
       lateral: SCENE_LATERAL.side,
     },
     materialPreset: "matte",
@@ -65,9 +62,9 @@ export const sectionAnchors: Record<SectionSlug, SceneAnchor> = {
   },
   projects: {
     objectTransform: {
-      position: [0, -0.02, -0.36],
-      rotation: [0.05, 0, 0],
-      scale: [1.02, 1.02, 1.02],
+      position: [0, -0.12, -0.48],
+      rotation: [-0.035, 0.35, 0.025],
+      scale: [0.98, 0.98, 0.98],
       lateral: -SCENE_LATERAL.side,
     },
     materialPreset: "chrome",
@@ -90,10 +87,10 @@ export const sectionAnchors: Record<SectionSlug, SceneAnchor> = {
   },
   faq: {
     objectTransform: {
-      position: [0, 0.03, -0.3],
-      rotation: [0.05, 0, 0],
-      scale: [1.0, 1.0, 1.0],
-      lateral: 0,
+      position: [0, 0.12, -0.34],
+      rotation: [0.04, -0.16, -0.02],
+      scale: [1.08, 1.08, 1.08],
+      lateral: SCENE_LATERAL.side * 0.55,
     },
     materialPreset: "chrome",
     cameraHint: {
@@ -115,10 +112,10 @@ export const sectionAnchors: Record<SectionSlug, SceneAnchor> = {
   },
   contact: {
     objectTransform: {
-      position: [0, -0.06, 0],
-      rotation: [0.05, 0, 0],
-      scale: [0.98, 0.98, 0.98],
-      lateral: SCENE_LATERAL.side,
+      position: [0, -0.08, -0.12],
+      rotation: [0.015, 0.22, 0.015],
+      scale: [1.18, 1.18, 1.18],
+      lateral: -SCENE_LATERAL.side * 0.8,
     },
     /** Neutral cool tint; avoid "neon" here — emissive + rim read as harsh green on the scan. */
     materialPreset: "glass",

@@ -4,12 +4,12 @@ import { useSceneState } from "@/context/scene-state-context";
 import { sectionAnchors } from "@/lib/scene/sectionAnchors";
 import {
   HERO_SCENE_MODEL_GLB,
-  SCENE_DAMPING,
-  SCENE_LATERAL,
   SCENE_MOTION,
+  SCENE_TRAVEL,
   SECTION_ORDER,
 } from "@/lib/scene/sceneConfig";
-import { plateauBlendT, sectionBlend } from "@/lib/scene/scrollAlong";
+import { advanceMotion, cinematicEase } from "@/lib/scene/motion";
+import { sectionBlend } from "@/lib/scene/scrollAlong";
 import type { MaterialPreset, SectionSlug } from "@/lib/scene/types";
 import { worldXFromLateral } from "@/lib/scene/viewportX";
 import { ContactShadows, useGLTF } from "@react-three/drei";
@@ -30,6 +30,7 @@ import {
   Texture,
   Vector3,
 } from "three";
+import PortraitOrbit from "./PortraitOrbit";
 
 /** How strongly section presets tint textured albedo (multiply with baseColor map). */
 const TEXTURE_TINT_STRENGTH = 0.14;
@@ -399,7 +400,7 @@ function tweenMaterialToPreset(
 }
 
 export default function SceneObjectManager() {
-  const { scrollAlongRef } = useSceneState();
+  const { scrollAlongRef, pointerRef } = useSceneState();
   const { scene } = useGLTF(HERO_SCENE_MODEL_GLB);
   const { gl, camera, size } = useThree();
   const [viewportScaleBoost, setViewportScaleBoost] = useState(
@@ -407,7 +408,7 @@ export default function SceneObjectManager() {
   );
 
   useEffect(() => {
-    const mqNarrow = window.matchMedia("(max-width: 767px)");
+    const mqNarrow = window.matchMedia("(max-width: 768px)");
     const mqDesktop = window.matchMedia("(min-width: 1024px)");
     const resolve = () => {
       if (mqNarrow.matches) {
@@ -433,7 +434,7 @@ export default function SceneObjectManager() {
   const mobileHeroFadeRef = useRef<Group>(null);
   /** Subtle idle drift; kept separate so pose damping can own `poseGroupRef`. */
   const driftGroupRef = useRef<Group>(null);
-  /** Pendulum yaw: only `rotation.y` — swings until a sliver of the back, then reverses. */
+  /** Section facing, slow idle orbit and pointer response. */
   const spinGroupRef = useRef<Group>(null);
   const rimLightRef = useRef<PointLight>(null);
   const materialsRef = useRef<(MeshStandardMaterial | MeshPhysicalMaterial)[]>(
@@ -443,10 +444,17 @@ export default function SceneObjectManager() {
   const lastMaterialSlugRef = useRef<SectionSlug | null>(null);
   const initializedRef = useRef(false);
   const frameClockRef = useRef(0);
-  const alongSmoothRef = useRef(0);
-  const alongReadyRef = useRef(false);
-  const lateralSmoothRef = useRef(0);
-  const lateralReadyRef = useRef(false);
+  const motionRef = useRef({
+    x: { value: 0, velocity: 0 },
+    y: { value: 0.04, velocity: 0 },
+    z: { value: 0, velocity: 0 },
+    scale: { value: 1.35, velocity: 0 },
+    pitch: { value: 0.06, velocity: 0 },
+    yaw: { value: 0, velocity: 0 },
+    roll: { value: 0, velocity: 0 },
+    pointerX: { value: 0, velocity: 0 },
+    pointerY: { value: 0, velocity: 0 },
+  });
   const modelHalfWidthRef = useRef(0.55);
   const idlePhaseRef = useRef(0);
   const introProgressRef = useRef(0);
@@ -562,22 +570,12 @@ export default function SceneObjectManager() {
     }
 
     const isNarrowViewport = viewportScaleBoost === VIEWPORT_SCALE_MOBILE;
-    const alongRaw = scrollAlongRef.current;
-
-    if (!alongReadyRef.current) {
-      alongSmoothRef.current = alongRaw;
-      alongReadyRef.current = true;
-    } else {
-      alongSmoothRef.current = MathUtils.damp(
-        alongSmoothRef.current,
-        alongRaw,
-        SCENE_DAMPING.along,
-        dt,
-      );
-    }
-
-    const along = alongSmoothRef.current;
-    const { i, j, t } = sectionBlend(along, SECTION_ORDER.length);
+    // Spring the actual pose toward the latest destination. Skipped sections
+    // don't queue a series of side-to-side journeys during a fast scroll.
+    const along = scrollAlongRef.current;
+    const { i, j, t: linearT } = sectionBlend(along, SECTION_ORDER.length);
+    const t = cinematicEase(linearT);
+    const motion = motionRef.current;
     const slugA = SECTION_ORDER[i];
     const slugB = SECTION_ORDER[j];
     const anchorA = sectionAnchors[slugA];
@@ -609,14 +607,18 @@ export default function SceneObjectManager() {
         1,
       );
 
-      mobileFadeWrap.visible = opacity > 0.008;
-      mobileFadeWrap.position.set(0, lift, 0);
-      mobileFadeWrap.scale.set(scaleUniform, scaleUniform, scaleUniform);
+      mobileFadeWrap.visible = materials.some((mat) => mat.opacity > 0.008);
+      mobileFadeWrap.position.y = MathUtils.damp(
+        mobileFadeWrap.position.y, lift, 7, dt,
+      );
+      mobileFadeWrap.scale.setScalar(
+        MathUtils.damp(mobileFadeWrap.scale.x, scaleUniform, 7, dt),
+      );
       mobileFadeWrap.rotation.set(0, 0, 0);
 
-      const transparent = opacity < 0.995;
       for (const mat of materials) {
-        mat.opacity = opacity;
+        mat.opacity = MathUtils.damp(mat.opacity, opacity, 7, dt);
+        const transparent = mat.opacity < 0.995;
         mat.transparent = transparent;
         mat.depthWrite = !transparent;
       }
@@ -646,9 +648,9 @@ export default function SceneObjectManager() {
     );
 
     driftWrap.position.set(
-      Math.sin(frameClockRef.current * 0.32) * driftStrength,
-      Math.cos(frameClockRef.current * 0.4) * driftStrength,
-      0,
+      Math.sin(frameClockRef.current * 0.32) * driftStrength * 1.8,
+      Math.cos(frameClockRef.current * 0.48) * driftStrength * 2.8,
+      Math.sin(frameClockRef.current * 0.24) * driftStrength,
     );
 
     idlePhaseRef.current += (dt * Math.PI * 2) / SCENE_MOTION.yawPeriod;
@@ -658,12 +660,6 @@ export default function SceneObjectManager() {
     const yawAmplitude = (yawMax - yawMin) * 0.5;
     const pendulumYaw =
       yawCenter + Math.sin(idlePhaseRef.current) * yawAmplitude;
-    spin.rotation.set(
-      0,
-      MODEL_FORWARD_YAW_OFFSET + SCENE_MOTION.baseYaw + pendulumYaw,
-      0,
-    );
-
     const posA = anchorA.objectTransform.position;
     const posB = anchorB.objectTransform.position;
     const rotA = anchorA.objectTransform.rotation;
@@ -681,19 +677,26 @@ export default function SceneObjectManager() {
       1 - Math.pow(1 - introProgressRef.current, 4),
     );
     const scaleUniform =
-      clamp(MathUtils.lerp(scA[0], scB[0], t), 0.9, 1.35) *
+      advanceMotion(
+        motion.scale,
+        clamp(MathUtils.lerp(scA[0], scB[0], t), 0.9, 1.35),
+        dt, 0.65, 0.5,
+      ) *
       viewportScaleBoost *
       introMul;
     pose.scale.set(scaleUniform, scaleUniform, scaleUniform);
-    pose.rotation.set(MathUtils.lerp(rotA[0], rotB[0], t), 0, 0);
 
-    const poseY = clamp(MathUtils.lerp(posA[1], posB[1], t), -0.4, 0.4);
-    const poseZ = clamp(MathUtils.lerp(posA[2], posB[2], t), -0.65, 0.1);
-    const lateralT = plateauBlendT(t, SCENE_LATERAL.hold);
+    const arc = Math.sin(Math.PI * linearT) ** 2;
+    const poseY = clamp(
+      MathUtils.lerp(posA[1], posB[1], t) + arc * SCENE_TRAVEL.arcLift, -0.4, 0.4,
+    );
+    const poseZ = clamp(
+      MathUtils.lerp(posA[2], posB[2], t) - arc * SCENE_TRAVEL.arcDepth, -0.65, 0.1,
+    );
     const lateral = MathUtils.lerp(
       anchorA.objectTransform.lateral,
       anchorB.objectTransform.lateral,
-      lateralT,
+      t,
     );
     let targetX = 0;
     if (camera instanceof PerspectiveCamera) {
@@ -706,18 +709,40 @@ export default function SceneObjectManager() {
         size.width / Math.max(1, size.height),
       );
     }
-    if (!lateralReadyRef.current) {
-      lateralSmoothRef.current = targetX;
-      lateralReadyRef.current = true;
-    } else {
-      lateralSmoothRef.current = MathUtils.damp(
-        lateralSmoothRef.current,
-        targetX,
-        SCENE_DAMPING.lateral,
-        dt,
-      );
-    }
-    pose.position.set(lateralSmoothRef.current, poseY, poseZ);
+    pose.position.set(
+      advanceMotion(motion.x, targetX, dt, SCENE_TRAVEL.settleTime, SCENE_TRAVEL.maxSpeed),
+      advanceMotion(motion.y, poseY, dt, SCENE_TRAVEL.settleTime, 0.7),
+      advanceMotion(motion.z, poseZ, dt, SCENE_TRAVEL.settleTime, 0.9),
+    );
+    const pointerX = advanceMotion(
+      motion.pointerX, isNarrowViewport ? 0 : pointerRef.current.x, dt, 0.7, 2,
+    );
+    const pointerY = advanceMotion(
+      motion.pointerY, isNarrowViewport ? 0 : -pointerRef.current.y, dt, 0.7, 2,
+    );
+    pose.rotation.set(
+      advanceMotion(
+        motion.pitch, MathUtils.lerp(rotA[0], rotB[0], t) + pointerY * 0.045,
+        dt, 0.7, 0.35,
+      ),
+      0,
+      advanceMotion(
+        motion.roll,
+        MathUtils.lerp(rotA[2], rotB[2], t) - motion.x.velocity * SCENE_TRAVEL.bank,
+        dt, 0.65, 0.25,
+      ),
+    );
+    spin.rotation.set(
+      0,
+      MODEL_FORWARD_YAW_OFFSET + SCENE_MOTION.baseYaw +
+        pendulumYaw * (isNarrowViewport ? 0.65 : 1) +
+        advanceMotion(
+          motion.yaw,
+          MathUtils.lerp(rotA[1], rotB[1], t) + pointerX * 0.16 + motion.x.velocity * 0.1,
+          dt, 0.8, 0.8,
+        ),
+      0,
+    );
 
     if (materials.length === 0) {
       applyMobileHeroScrollFade();
@@ -777,6 +802,7 @@ export default function SceneObjectManager() {
           >
             <primitive object={model} />
           </group>
+          {viewportScaleBoost !== VIEWPORT_SCALE_MOBILE && <PortraitOrbit />}
           <ContactShadows
             position={[0, -1.08, 0]}
             opacity={0.28}
